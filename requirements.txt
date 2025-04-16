@@ -1,0 +1,11 @@
+scikit-learn
+pandas
+numpy
+matplotlib
+seaborn
+scipy
+lifelines
+statsmodels
+torch
+random
+math
