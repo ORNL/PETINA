@@ -31,7 +31,11 @@ Here's a simple example of how to use PETINA:
 import numpy as np
 from petina import baselines
 
+domain = [1, 2, 13, 4, 5, 11, 21, 3, 14, 5, 10, 12, 4, 16, 7, 18, 10, 30, 20, 15, 27]
+epsilon = 0.1
+delta = 10e-5
 
+print("DP = ", baselines.applyDPGaussian(domain, delta, epsilon))
 ```
 
 ## Acknowledgement
