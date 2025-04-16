@@ -38,5 +38,30 @@ delta = 10e-5
 print("DP = ", baselines.applyDPGaussian(domain, delta, epsilon))
 ```
 
+## Detailed Example
+
+For a more comprehensive example, see the [supervised_experiment.py](examples/supervised_experiment.py) script, which demonstrates:
+1. Loading and preprocessing the XY dataset
+2. Applying differential privacy with different noise scaling strategies
+3. Evaluating and comparing the utility of each approach
+4. Visualizing the results
+   
+To run the example:
+
+```bash
+python examples/supervised_experiment.py
+```
+
+## Experimental Results
+
+## API Reference
+
+### Core Functions
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
 ## Acknowledgement
-This manuscript has been co-authored by UT-Battelle, LLC, under Contract No. DE-AC05-00OR22725 with the U.S. Department of Energy. The United States Government retains and the publisher, by accepting the article for publication, acknowledges that the United States Government retains a nonexclusive, paid-up, irrevocable, world-wide license to publish or reproduce the published form of this manuscript, or allow others to do so, for United States Government purposes. The Department of Energy will provide public access to these results of federally sponsored research in accordance with the DOE Public Access Plan (http://energy.gov/downloads/doe-public-access-plan).
+This material is based upon work supported by the U.S. Department of Energy, Office of Science, Office of Advanced Scientific Computing Research under Contract No. DE-AC05-00OR22725. This manuscript has been co-authored by UT-Battelle, LLC under Contract No. DE-AC05-00OR22725 with the U.S. Department of Energy. The United States Government retains and the publisher, by accepting the article for publication, acknowledges that the United States Government retains a non-exclusive, paid-up, irrevocable, world-wide license to publish or reproduce the published form of this manuscript, or allow others to do so, for United States Government purposes. The Department of Energy will provide public access to these results of federally sponsored research in accordance with the DOE Public Access Plan (http://energy.gov/downloads/doe-public-access-plan).
+
