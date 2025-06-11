@@ -1,1 +1,1 @@
-from .baselines import *
+from .algorithms import *
