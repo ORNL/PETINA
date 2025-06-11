@@ -22,7 +22,7 @@ pip install -e .
 
 You can install the package directly from PyPI:
 ```bash
-pip install petina
+pip install PETINA
 ```
 
 ## Quick Start
