@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "PETINA"
 version = "0.0.13"
-description = "Package for applying privacy techniques"
+description = "This library contains a collection of privacy preservation techniques."
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [
@@ -29,7 +29,7 @@ dependencies = [
   "scipy"
 ]
 [project.urls]
-Homepage = "https://github.com/OKotevska/PETINA"
-Repository = "https://github.com/OKotevska/PETINA.git"
+Homepage = "https://github.com/ORNL/PETINA"
+Repository = "https://github.com/ORNL/PETINA.git"
 
 
