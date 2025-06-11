@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "PETINA"
+version = "0.0.13"
+description = "Package for applying privacy techniques"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+  {name = "Olivera Kotevska", email = "KOTEVSKAO@ORNL.GOV"},
+
+]
+maintainers = [
+  {name = "Olivera Kotevska", email = "KOTEVSKAO@ORNL.GOV"}
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+keywords = ["privacy", "machine learning", "federated learning"]
+classifiers = [
+  "Programming Language :: Python",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent"
+]
+dependencies = [
+  "torch",
+  "numpy",
+  "scipy"
+]
+[project.urls]
+Homepage = "https://github.com/OKotevska/PETINA"
+Repository = "https://github.com/OKotevska/PETINA.git"
+
+
