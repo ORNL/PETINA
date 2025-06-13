@@ -69,7 +69,7 @@ def list_to_torch(flattened_list, tensor_shape):
     """
     reverted_tensor = torch.as_tensor(flattened_list).reshape(tensor_shape)
     return reverted_tensor
-    
+
 
 def type_checking_and_return_lists(domain):
     """
@@ -91,7 +91,7 @@ def type_checking_and_return_lists(domain):
         shape = 0  # Shape information is not used for plain lists
     else:
         raise ValueError("only takes list, ndarray, tensor type")
-    
+
     return items, shape
 
 
@@ -118,9 +118,9 @@ def type_checking_return_actual_dtype(domain, result, shape):
 # Differential Privacy Mechanisms
 # -------------------------------
 
-# Depending on your data, parameters for each privacy technique below will need to be changed. The default 
+# Depending on your data, parameters for each privacy technique below will need to be changed. The default
 # parameter might not be the best value and can affect the accuracy of your model
-# Source: The Algorithmic Foundations of Differential Privacy by Cynthia Dwork and Aaron Roth. Foundations and Trends in Theoretical Computer Science. 
+# Source: The Algorithmic Foundations of Differential Privacy by Cynthia Dwork and Aaron Roth. Foundations and Trends in Theoretical Computer Science.
 # Vol. 9, no. 3–4, pp. 211‐407, Aug. 2014. doi:10.1561/0400000042
 def applyFlipCoin(probability, domain):
     """
@@ -139,10 +139,10 @@ def applyFlipCoin(probability, domain):
     # Ensure the probability is valid.
     if not 0 <= probability <= 1:
         raise ValueError("Probability must be between 0 and 1.")
-    
+
     # Convert input data to list.
     items, shape = type_checking_and_return_lists(domain)
-    
+
     # Create a list of boolean values; True with probability 'probability'
     prob = [np.random.rand() < probability for _ in items]
 
@@ -150,7 +150,7 @@ def applyFlipCoin(probability, domain):
     # Determine the minimum and maximum values in the list for random replacement.
     item_min = min(items)
     item_max = max(items)
-    
+
     # For each item, decide whether to keep it or replace it with a random value.
     for p, n in zip(prob, items):
         if p == True:
@@ -208,7 +208,7 @@ def applyRDPGaussian(domain, sensitivity=1, alpha=10, epsilon_bar=1):
     # Calculate sigma based on sensitivity, alpha, and epsilon_bar.
     sigma = np.sqrt((sensitivity**2 * alpha) / (2 * epsilon_bar))
     # Add Gaussian noise for each element.
-    privatized = [v + np.random.normal(loc=0, scale=sigma) for v in data]   
+    privatized = [v + np.random.normal(loc=0, scale=sigma) for v in data]
 
     return type_checking_return_actual_dtype(domain, privatized, shape)
 
@@ -249,8 +249,8 @@ def applyDPExponential(domain, sensitivity=1, epsilon=1, gamma=1.0):
 
 
 # -------------------------------
-# Source: Cynthia Dwork, Frank McSherry, Kobbi Nissim, and Adam Smith. Calibrating noise to sensitivity in private data analysis. 
-# In Proceedings of the Third Conference on Theory of Cryptography, TCC'06, 265–284. Berlin, Heidelberg, 2006. Springer-Verlag. 
+# Source: Cynthia Dwork, Frank McSherry, Kobbi Nissim, and Adam Smith. Calibrating noise to sensitivity in private data analysis.
+# In Proceedings of the Third Conference on Theory of Cryptography, TCC'06, 265–284. Berlin, Heidelberg, 2006. Springer-Verlag.
 # URL: https://doi.org/10.1007/11681878_14, doi:10.1007/11681878_14.
 # -------------------------------
 def applyDPLaplace(domain, sensitivity=1, epsilon=1, gamma=1):
@@ -294,7 +294,7 @@ def above_threshold_SVT(val, domain, T, epsilon):
     """
     possible_val_list, shape = type_checking_and_return_lists(domain)
     T_hat = T + np.random.laplace(loc=0, scale=2 / epsilon)  # Noisy threshold
-    
+
     nu_i = np.random.laplace(loc=0, scale=4 / epsilon)  # Noise added to the value
     if val + nu_i >= T_hat:
         return val
@@ -303,7 +303,7 @@ def above_threshold_SVT(val, domain, T, epsilon):
 
 
 # -------------------------------
-# Source: Smith, A. (2011, June). Privacy-preserving statistical estimation with optimal convergence rates. 
+# Source: Smith, A. (2011, June). Privacy-preserving statistical estimation with optimal convergence rates.
 # In Proceedings of the forty-third annual ACM symposium on Theory of computing (pp. 813-822).
 # -------------------------------
 def percentilePrivacy(domain, percentile):
@@ -319,13 +319,13 @@ def percentilePrivacy(domain, percentile):
     """
     if not 0 <= percentile <= 100:
         raise ValueError("percentile must be between 0 and 100.")
-    
+
     data, shape = type_checking_and_return_lists(domain)
     data = np.array(data)
-    
+
     # Determine the lower bound using the percentile.
     lower_bound = np.percentile(data, percentile)
-    
+
     # Replace values below the lower bound with zero.
     data = np.where((data >= lower_bound), data, 0)
     data = data.tolist()
@@ -335,11 +335,11 @@ def percentilePrivacy(domain, percentile):
 
 # -------------------------------
 # Encoding and Perturbation Functions
-# Source: Úlfar Erlingsson, Vasyl Pihur, and Aleksandra Korolova. Rappor: randomized aggregatable privacy-preserving ordinal response. 
-# In Proceedings of the 2014 ACM SIGSAC Conference on Computer and Communications Security, CCS '14, 1054–1067. New York, NY, USA, 2014. 
+# Source: Úlfar Erlingsson, Vasyl Pihur, and Aleksandra Korolova. Rappor: randomized aggregatable privacy-preserving ordinal response.
+# In Proceedings of the 2014 ACM SIGSAC Conference on Computer and Communications Security, CCS '14, 1054–1067. New York, NY, USA, 2014.
 # Association for Computing Machinery. URL: https://doi.org/10.1145/2660267.2660348, doi:10.1145/2660267.2660348.
-# and 
-# Source: The Algorithmic Foundations of Differential Privacy by Cynthia Dwork and Aaron Roth. Foundations and Trends in Theoretical Computer Science. 
+# and
+# Source: The Algorithmic Foundations of Differential Privacy by Cynthia Dwork and Aaron Roth. Foundations and Trends in Theoretical Computer Science.
 # -------------------------------
 
 def perturb_bit(bit, p, q):
@@ -472,10 +472,10 @@ def the_aggregation_and_estimation(answers, epsilon=0.1, theta=1.0):
     # Compute the probabilities based on epsilon and theta.
     p = 1 - 0.5 * math.exp(epsilon / 2 * (1.0 - theta))
     q = 0.5 * math.exp(epsilon / 2 * (0.0 - theta))
-    
+
     sums = np.sum(answers, axis=0)
     n = len(answers)
-    
+
     # Adjust the sums to recover the original counts.
     return [int((i - n * q) / (p - q)) for i in sums]
 
@@ -577,7 +577,7 @@ def unary_epsilon(p, q):
 def histogramEncoding(value):
     """
     Implements histogram encoding with differential privacy using Laplace perturbation.
-    
+
     Parameters:
         value: Input data (list, numpy array, or tensor).
 
@@ -590,7 +590,7 @@ def histogramEncoding(value):
     responses = [she_perturbation(encode(r, domain)) for r in domain]
     counts = aggregate(responses)
     t = list(zip(domain, counts))
-    
+
     privatized = [count for _, count in t]
 
     return type_checking_return_actual_dtype(value, privatized, shape)
@@ -602,7 +602,7 @@ def histogramEncoding(value):
 def histogramEncoding_t(value):
     """
     An alternative histogram encoding using threshold-based perturbation and aggregation.
-    
+
     Parameters:
         value: Input data (list, numpy array, or tensor).
 
@@ -614,13 +614,13 @@ def histogramEncoding_t(value):
     the_perturbed_answers = [the_perturbation(encode(r, domain)) for r in domain]
     # Estimate the original counts.
     estimated_answers = the_aggregation_and_estimation(the_perturbed_answers)
-    
+
     return type_checking_return_actual_dtype(value, estimated_answers, shape)
 
 
 # -------------------------------
-# Source: Úlfar Erlingsson, Vasyl Pihur, and Aleksandra Korolova. Rappor: randomized aggregatable privacy-preserving ordinal response. 
-# In Proceedings of the 2014 ACM SIGSAC Conference on Computer and Communications Security, CCS '14, 1054–1067. New York, NY, USA, 2014. 
+# Source: Úlfar Erlingsson, Vasyl Pihur, and Aleksandra Korolova. Rappor: randomized aggregatable privacy-preserving ordinal response.
+# In Proceedings of the 2014 ACM SIGSAC Conference on Computer and Communications Security, CCS '14, 1054–1067. New York, NY, USA, 2014.
 # Association for Computing Machinery. URL: https://doi.org/10.1145/2660267.2660348, doi:10.1145/2660267.2660348.
 # -------------------------------
 def unaryEncoding(value, p=0.75, q=0.25):
@@ -640,14 +640,14 @@ def unaryEncoding(value, p=0.75, q=0.25):
     domain, _ = type_checking_and_return_lists(value)
     # Get unique values in the domain.
     unique_domain = list(set(domain))
-   
+
     # For each value, encode and perturb it.
     responses = [perturb(encode(r, unique_domain), p, q) for r in domain]
     # Aggregate perturbed responses.
     counts = aggregate(responses, p, q)
     # Zip unique values with their estimated counts.
     t = list(zip(unique_domain, counts))
-    
+
     return t
 
 
@@ -692,10 +692,10 @@ def applyClippingAdaptive(domain):
         Data with adaptive clipping applied, in the same format as the input.
     """
     value, shape = type_checking_and_return_lists(domain)
-    
+
     lower_quantile = 0.05
     lower = np.quantile(value, lower_quantile)
-    
+
     # Clip values between the lower bound and the maximum value.
     clipped_data = np.clip(value, lower, np.max(value))
     clipped_data = clipped_data.tolist()
@@ -727,7 +727,7 @@ def applyClippingDP(domain, clipping, sensitivity, epsilon):
     privatized = []
     for i in range(len(tmpValue)):
         privatized.append(tmpValue[i] + np.random.laplace(loc=0, scale=sensitivity / epsilon))
-        
+
     return type_checking_return_actual_dtype(domain, privatized, shape)
 
 # -------------------------------
