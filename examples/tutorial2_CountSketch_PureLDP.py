@@ -19,6 +19,7 @@ Algorithms used:
 
 Source: https://github.com/Samuel-Maddock/pure-LDP
 """
+#---- Import necessary libraries------------------------------------------
 from pure_ldp.frequency_oracles import *
 from pure_ldp.heavy_hitters import *
 import numpy as np
@@ -30,11 +31,11 @@ from scipy.linalg import hadamard  # Make sure this is imported if you use Hadam
 # ---- Import from PETINA ----
 from PETINA import generate_hash_funcs, Client_PETINA_CMS, Server_PETINA_CMS, centralized_count_mean_sketch
 from csvec import CSVec
-# ---- CSVec Implementation (from the previous response) ----
+# ---- CSVec import helper ----
 import copy
 import torch
 
-LARGEPRIME = 2**61 - 1
+# LARGEPRIME = 2**61 - 1
 
 cache = {}
 
