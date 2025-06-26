@@ -4,3 +4,10 @@ build
 dist
 *.eps
 *.txt
+
+__pycache__/
+*.pyc
+venv/
+*.log
+*.csv
+.env
