@@ -250,7 +250,7 @@ print("PETINA CMS Estimates:", petina_cms_estimates)  # New line for PETINA CMS
 print("Centralized CMS Estimates:", centralized_cms_estimates)  # New line for centralized CMS
 print("CSVec Estimates:", csvec_estimates)  # New line for CSVec
 print("Note: We round estimates to the nearest integer")
-
+print("\n")
 
 # ------------------------------ Heavy Hitters - PEM Simulation -------------------------
 
