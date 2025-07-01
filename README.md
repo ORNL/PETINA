@@ -17,7 +17,7 @@ The PETINA project is developed and maintained by the following contributors:
 We welcome new contributors. See the [Contributing](#contributing) section for how to get involved.
 
 
-## Features
+## Featuresw
 
 PETINA provides the following functionality:
 
