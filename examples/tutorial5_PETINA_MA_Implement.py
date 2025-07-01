@@ -514,7 +514,7 @@ if __name__ == "__main__":
     clipping_norm = 1.0 # Gradient clipping norm (sensitivity)
     
     # Differential Privacy parameters for the entire simulation (total budget)
-    total_epsilon_budget = 500
+    total_epsilon_budget = 2
     total_delta_budget = 1e-5 # Typical small delta for Gaussian DP
 
     # Noise multiplier for the DP mechanisms (this is related to the per-step epsilon/sigma)
@@ -556,22 +556,22 @@ if __name__ == "__main__":
     #     noise_multiplier=0.5 # Sigma for Gaussian noise
     # )
 
-    # # --- Run with Count Sketch (as communication efficiency) ---
-    # print("\n\n=============== Running with Count Sketch (as communication efficiency) ===============")
-    # run_federated_learning(
-    #     sketch_column=sketch_column,
-    #     sketch_row=sketch_row,
-    #     num_selected=num_selected,
-    #     total_epsilon=total_epsilon_budget,
-    #     total_delta=total_delta_budget,
-    #     method='count_sketch',
-    #     num_clients=num_clients,
-    #     num_rounds=num_rounds,
-    #     epochs=epochs,
-    #     batch_size=batch_size,
-    #     clipping_norm=clipping_norm,
-    #     noise_multiplier=0.0 # Not directly used by count_sketch as a noise param
-    # )
+    # --- Run with Count Sketch (as communication efficiency) ---
+    print("\n\n=============== Running with Count Sketch (as communication efficiency) ===============")
+    run_federated_learning(
+        sketch_column=sketch_column,
+        sketch_row=sketch_row,
+        num_selected=num_selected,
+        total_epsilon=total_epsilon_budget,
+        total_delta=total_delta_budget,
+        method='count_sketch',
+        num_clients=num_clients,
+        num_rounds=num_rounds,
+        epochs=epochs,
+        batch_size=batch_size,
+        clipping_norm=clipping_norm,
+        noise_multiplier=0.0 # Not directly used by count_sketch as a noise param
+    )
 
     # --- Example of Budget Exhaustion ---
     # print("\n\n=============== Demonstrating Budget Exhaustion ===============")
