@@ -17,7 +17,6 @@ from .bit_perturbation_and_encoding import (
     unaryEncoding)
 
 __all__ = [
-    "percentilePrivacy",
     "perturb_bit",
     "perturb",
     "get_p",

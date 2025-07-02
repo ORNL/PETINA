@@ -3,7 +3,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 import warnings
-from csvec.csvec import CSVec
+from PETINA import CSVec
 
 # --- New Custom Exception ---
 class BudgetExceededError(Exception):
