@@ -1,4 +1,4 @@
-from PETINA import algorithms,applyCountSketch
+from PETINA import Sketching
 import numpy as np
 # -------------------------------
 import math
@@ -14,7 +14,7 @@ import torch.optim as optim
 import numpy as np
 # from tqdm import tqdm
 import matplotlib.pyplot as plt
-from csvec import CSVec
+from PETINA import CSVec
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,9 +30,9 @@ rows = 10
 cols = 1024
 
 # Apply the Count Sketch to each data type.
-sketched_list = applyCountSketch(data_list, rows, cols)
-sketched_np = applyCountSketch(data_np, rows, cols)
-sketched_torch = applyCountSketch(data_torch, rows, cols)
+sketched_list = Sketching.applyCountSketch(data_list, rows, cols)
+sketched_np = Sketching.applyCountSketch(data_np, rows, cols)
+sketched_torch = Sketching.applyCountSketch(data_torch, rows, cols)
 
 # Print the results to see the approximation.
 print("\n--- Results ---")

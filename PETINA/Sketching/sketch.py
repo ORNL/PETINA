@@ -6,7 +6,11 @@ import random
 import torch
 import numpy as np
 from scipy import stats as st
-from csvec import CSVec
+# from csvec import CSVec
+from ..package.csvec.csvec import CSVec
+
+
+
 from PETINA.Data_Conversion_Helper import type_checking_and_return_lists, type_checking_return_actual_dtype
 #-----------Jackie work ---------
 # -------------------------------

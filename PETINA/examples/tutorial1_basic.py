@@ -1,34 +1,80 @@
-from petina import algorithms
+# File: summer_2025/improving_petina/PETINA/PETINA/examples/tutorial1_basic.py
+
+# --- Import necessary modules ---
+from PETINA import DP_Mechanisms, Encoding_Pertubation, Clipping, Pruning
 import numpy as np
+import random
 
-#domain = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])
-# domain = [1,2,3,4,5,1,2,3,4,5]
-#domain = torch.tensor([[1, 2, 3], [4, 5, 6]])
+# --- Generate synthetic data ---
+base_domain = list(range(1, 11))  # Multiplier base
+domain = [random.randint(10, 1000) * random.choice(base_domain) for _ in range(10)]
+print("=== Synthetic Like Numbers ===")
+print("Domain:", domain)
 
-# Generate 10 synthetic "like" numbers between 10 and 1000
-domain = [random.randint(10, 1000) * random.choice(domain) for _ in range(10)]
-
-print("Synthetic like numbers:", domain)
+# --- Set DP parameters ---
 sensitivity = 1
 epsilon = 0.1
-delta = 10e-5
+delta = 1e-4
 gamma = 0.001
 
+# --- Differential Privacy Mechanisms ---
+print("\n=== Flip Coin Mechanism ===")
+print("FlipCoin (p=0.9) on domain [1-10]:")
+print(DP_Mechanisms.applyFlipCoin(probability=0.9, domain=[1,2,3,4,5,6,7,8,9,10]))
 
-print(algorithms.applyFlipCoin(probability=0.9, items=[1,2,3,4,5,6,7,8,9,10]))  
-print("DP = ", algorithms.applyDPLaplace(domain, sensitivity, epsilon))
-print("DP = ", algorithms.applyDPGaussian(domain, delta, epsilon))
-print("DP = ", algorithms.applyDPExponential(domain, sensitivity, epsilon))
-print("Percentile Privacy=", algorithms.percentilePrivacy(domain, 10))  
-print("unary encoding = ", algorithms.unaryEncoding(domain, p=.75, q=.25))   # can add p and q value or can use default p and q
-print("histogram encoding 1 = ", algorithms.histogramEncoding(domain))
-print("histogram encoding 2 = ", algorithms.histogramEncoding_t(domain))
-print("clipping = ", algorithms.applyClippingDP(domain, 0.4, 1.0, 0.1))
-print("adaptive clipping = ", algorithms.applyClippingAdaptive(domain))
-print("pruning = ", algorithms.applyPruning(domain, 0.8))
-print("adaptive pruninig = ", algorithms.applyPruningAdaptive(domain))
-print("pruning+DP = ", algorithms.applyPruningDP(domain, 0.8, sensitivity, epsilon))
-print(algorithms.get_p(epsilon))
-print(algorithms.get_q(p=0.5,eps=epsilon))
-print(algorithms.get_gamma_sigma(p=0.5,eps=epsilon))#
-print(algorithms.above_threshold_SVT(.3, domain, T=.5, epsilon=epsilon))
+print("\n=== Laplace Mechanism ===")
+print("DP =", DP_Mechanisms.applyDPLaplace(domain, sensitivity, epsilon))
+
+print("\n=== Gaussian Mechanism ===")
+print("DP =", DP_Mechanisms.applyDPGaussian(domain, delta, epsilon, gamma))
+
+print("\n=== Exponential Mechanism ===")
+print("DP =", DP_Mechanisms.applyDPExponential(domain, sensitivity, epsilon, gamma))
+
+print("\n=== Sparse Vector Technique (Above Threshold SVT) ===")
+print("DP =", DP_Mechanisms.above_threshold_SVT(0.3, domain, T=0.5, epsilon=epsilon))
+
+print("\n=== Percentile Privacy ===")
+print("Percentile Privacy =", DP_Mechanisms.percentilePrivacy(domain, 10))
+
+# --- Encoding Techniques ---
+print("\n=== Unary Encoding ===")
+print("Unary encoding (p=0.75, q=0.25):")
+print(Encoding_Pertubation.unaryEncoding(domain, p=0.75, q=0.25))
+
+print("\n=== Histogram Encoding ===")
+print("Histogram encoding (version 1):")
+print(Encoding_Pertubation.histogramEncoding(domain))
+
+print("Histogram encoding (version 2):")
+print(Encoding_Pertubation.histogramEncoding_t(domain))
+
+# --- Clipping Techniques ---
+print("\n=== Clipping ===")
+print("Fixed clipping (min=0.4, max=1.0, step=0.1):")
+print(Clipping.applyClippingDP(domain, 0.4, 1.0, 0.1))
+
+print("Adaptive clipping:")
+print(Clipping.applyClippingAdaptive(domain))
+
+# --- Pruning Techniques ---
+print("\n=== Pruning ===")
+print("Fixed pruning (threshold=0.8):")
+print(Pruning.applyPruning(domain, 0.8))
+
+print("Adaptive pruning:")
+print(Pruning.applyPruningAdaptive(domain))
+
+print("Pruning with DP (threshold=0.8):")
+print(Pruning.applyPruningDP(domain, 0.8, sensitivity, epsilon))
+
+# --- Utility Functions for Parameters ---
+print("\n=== Utility Functions ===")
+print("Get p from epsilon:")
+print(Encoding_Pertubation.get_p(epsilon))
+
+print("Get q from p and epsilon:")
+print(Encoding_Pertubation.get_q(p=0.5, eps=epsilon))
+
+print("Get gamma and sigma from p and epsilon:")
+print(Encoding_Pertubation.get_gamma_sigma(p=0.5, eps=epsilon))

@@ -30,7 +30,7 @@ from scipy.linalg import hadamard  # Make sure this is imported if you use Hadam
 
 # ---- Import from PETINA ----
 from PETINA import generate_hash_funcs, Client_PETINA_CMS, Server_PETINA_CMS, centralized_count_mean_sketch
-from csvec import CSVec
+from PETINA import CSVec
 # ---- CSVec import helper ----
 import copy
 import torch
