@@ -48,9 +48,7 @@ def applyFlipCoin(probability, domain):
             result.append(random.randint(item_min, item_max))  # Replace with random integer
 
     # Convert the result back to the original data type.
-    print("domain", domain) #Jackie comment: This is for debugging purposes, can be removed later
-    print("result", result) #Jackie comment: This is for debugging purposes, can be removed later
-    print("shape", shape)   #Jackie comment: This is for debugging purposes, can be removed later
+
     return type_checking_return_actual_dtype(domain, result, shape)
 
 
@@ -76,9 +74,6 @@ def applyDPGaussian(domain, delta=10e-5, epsilon=1, gamma=1):
     sigma = np.sqrt(2 * np.log(1.25 / delta)) * gamma / epsilon
     # Add Gaussian noise to each data point.
     privatized = data + np.random.normal(loc=0, scale=sigma, size=len(data))
-    print("domain", domain)     #Jackie comment: This is for debugging purposes, can be removed later
-    print("privatized", privatized) #Jackie comment: This is for debugging purposes, can be removed later
-    print("shape", shape)           #Jackie comment: This is for debugging purposes, can be removed later
     return type_checking_return_actual_dtype(domain, privatized, shape)
 
 
@@ -138,9 +133,6 @@ def applyDPExponential(domain, sensitivity=1, epsilon=1, gamma=1.0):
 
     # Convert the result back to a list.
     privatized = privatized.tolist()
-    print("domain", domain)         # Jackie comment: This is for debugging purposes, can be removed later
-    print("privatized", privatized) # Jackie comment: This is for debugging purposes, can be removed later
-    print("shape", shape)           # Jackie comment: This is for debugging purposes, can be removed later
     return type_checking_return_actual_dtype(domain, privatized, shape)
 
 
@@ -165,7 +157,4 @@ def applyDPLaplace(domain, sensitivity=1, epsilon=1, gamma=1):
     data, shape = type_checking_and_return_lists(domain)
     # Add Laplace noise to each element.
     privatized = data + np.random.laplace(loc=0, scale=sensitivity * gamma / epsilon, size=len(data))
-    print("domain", domain)             # Jackie comment: This is for debugging purposes, can be removed later
-    print("privatized", privatized)     # Jackie comment: This is for debugging purposes, can be removed later
-    print("shape", shape)               # Jackie comment: This is for debugging purposes, can be removed later
     return type_checking_return_actual_dtype(domain, privatized, shape)
