@@ -151,9 +151,10 @@ print("DP Output =", DP_Mechanisms.applyDPGaussian(domain, delta, epsilon))
 We also provide hands-on [examples](./PETINA/examples/) in the examples folder.
 
 - [Example 1](./PETINA/examples/tutorial1_basic.py): Basic PETINA Usage.
-- [Example 2](./PETINA/examples/tutorial2_CountSketch_PureLDP.py): 
-
-
+- [Example 2](./PETINA/examples/tutorial2_CountSketch_PureLDP.py): This example demonstrates how to perform frequency estimation on synthetic categorical data using various pure Local Differential Privacy (LDP) algorithms. It also compares PETINA's Count Mean Sketch (CMS) and CSVec-based sketching with baseline LDP methods and a centralized CMS variant.
+- [Example 3](./PETINA/examples/tutorial3_Moment_Accounting.py): This script demonstrates differentially private training in PyTorch using PETINA with budget tracking, clipping, and noise injection.
+- [Example 4](./PETINA/examples/tutorial4_csVec_implementation_PETINA.py): This script demonstrates how to apply PETINA's Count Sketch mechanism to lists, NumPy arrays, and PyTorch tensors for efficient data approximation.
+- [Example 5](./PETINA/examples/tutorial5_PETINA_MA_Implement.py): This script runs a federated learning simulation with optional Laplace, Gaussian, or Count Sketch-based privacy mechanisms, integrated with PETINA's budget accountant to track and gracefully handle differential privacy budget consumption.
 ##  Installation
 - Install from PyPI
 ```bash
