@@ -130,3 +130,6 @@ ENV/
 # all sub-directories in notebooks
 /notebooks/*/
 Pipfile
+
+# project files
+pyproject.toml
