@@ -3,12 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import warnings
-from PETINA import CSVec
 from torch.utils.data import DataLoader, TensorDataset
-
-# Import the BudgetAccountant and related classes from your files
-from accountant import BudgetAccountant
-from utils import Budget, BudgetError 
+from PETINA import BudgetAccountant, Budget, BudgetError,Sketching,CSVec
 
 # -------------------------------
 # Data Conversion Helper Functions (Keep these as they are)
@@ -466,7 +462,7 @@ def run_federated_learning(
             for i in range(num_selected):
                 # Calculate diff and sketch it
                 diff_tensor = getModelParameterFlatten(client_models[i]) - getModelParameterFlatten(client_old_models[i])
-                sketched_diff = applyCountSketch(diff_tensor, sketch_row, sketch_column)
+                sketched_diff = Sketching.applyCountSketch(diff_tensor, sketch_row, sketch_column)
                 client_diff_sketches.append(sketched_diff)
             
             summed_diff_Sketch = server_aggregate_sketches(global_model, client_diff_sketches, sketch_column, sketch_row, num_selected)
@@ -557,21 +553,21 @@ if __name__ == "__main__":
     # )
 
     # --- Run with Count Sketch (as communication efficiency) ---
-    print("\n\n=============== Running with Count Sketch (as communication efficiency) ===============")
-    run_federated_learning(
-        sketch_column=sketch_column,
-        sketch_row=sketch_row,
-        num_selected=num_selected,
-        total_epsilon=total_epsilon_budget,
-        total_delta=total_delta_budget,
-        method='count_sketch',
-        num_clients=num_clients,
-        num_rounds=num_rounds,
-        epochs=epochs,
-        batch_size=batch_size,
-        clipping_norm=clipping_norm,
-        noise_multiplier=0.0 # Not directly used by count_sketch as a noise param
-    )
+    # print("\n\n=============== Running with Count Sketch (as communication efficiency) ===============")
+    # run_federated_learning(
+    #     sketch_column=sketch_column,
+    #     sketch_row=sketch_row,
+    #     num_selected=num_selected,
+    #     total_epsilon=total_epsilon_budget,
+    #     total_delta=total_delta_budget,
+    #     method='count_sketch',
+    #     num_clients=num_clients,
+    #     num_rounds=num_rounds,
+    #     epochs=epochs,
+    #     batch_size=batch_size,
+    #     clipping_norm=clipping_norm,
+    #     noise_multiplier=0.0 # Not directly used by count_sketch as a noise param
+    # )
 
     # --- Example of Budget Exhaustion ---
     # print("\n\n=============== Demonstrating Budget Exhaustion ===============")
