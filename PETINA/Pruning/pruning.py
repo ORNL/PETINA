@@ -35,9 +35,6 @@ def applyPruning(domain, prune_ratio):
                     pruned.append(-prune_ratio)
             else:
                 pruned.append(0)
-    print("domain", domain)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("pruned", pruned)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("shape", shape)  # Jackie comment: This is for debugging purposes, can be removed later
     return type_checking_return_actual_dtype(domain, pruned, shape)
 
 # -------------------------------
@@ -67,9 +64,6 @@ def applyPruningAdaptive(domain):
                     pruned.append(-prune_ratio)
             else:
                 pruned.append(0)
-    print("domain", domain)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("pruned", pruned)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("shape", shape)  # Jackie comment: This is for debugging purposes, can be removed later
     return type_checking_return_actual_dtype(domain, pruned, shape)
 
 # -------------------------------
@@ -94,7 +88,4 @@ def applyPruningDP(domain, prune_ratio, sensitivity, epsilon):
     privatized = []
     for i in range(len(tmpValue)):
         privatized.append(tmpValue[i] + np.random.laplace(loc=0, scale=sensitivity / epsilon))
-    print("domain", domain)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("privatized", privatized)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("shape", shape)  # Jackie comment: This is for debugging purposes, can be removed later
     return type_checking_return_actual_dtype(domain, privatized, shape)

@@ -109,4 +109,4 @@ def type_checking_return_actual_dtype(domain, result, shape):
     elif isinstance(domain, np.ndarray):
         return list_to_numpy(result, shape)  # Convert list back to numpy array
     else:  # If input was a list, return the list as is
-         return result
+        return result
