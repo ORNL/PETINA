@@ -8,7 +8,7 @@ import numpy as np
 # Data Conversion Helper Functions
 # -------------------------------
 
-def numpy_to_list(nd_array):
+def numpy_to_list(nd_array): 
     """
     Converts a NumPy array to a flattened list and returns its original shape.
 
@@ -23,7 +23,7 @@ def numpy_to_list(nd_array):
     return flattened_list, nd_array_shape
 
 
-def list_to_numpy(flattened_list, nd_array_shape):
+def list_to_numpy(flattened_list, nd_array_shape): 
     """
     Converts a flattened list back to a NumPy array with the given shape.
 
@@ -38,7 +38,7 @@ def list_to_numpy(flattened_list, nd_array_shape):
     return reverted_ndarray
 
 
-def torch_to_list(torch_tensor):
+def torch_to_list(torch_tensor): 
     """
     Converts a PyTorch tensor to a flattened list and returns its original shape.
 
