@@ -109,8 +109,8 @@ If you use PETINA in your research, please cite the official DOE OSTI release:
 }
 ```
 ## Contributors
-- Oliver Kotevska – KOTEVSKAO@ORNL.GOV – Project Lead - Maintainer
-- Trong Nguyen – NT9@ORNL.GOV – Intern Student
+- Oliver Kotevska – KOTEVSKAO@ORNL.GOV – Maintainer
+- Trong Nguyen – NT9@ORNL.GOV – Developer
 
 
 We welcome community contributions to PETINA.
