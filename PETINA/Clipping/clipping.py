@@ -54,9 +54,6 @@ def applyClippingAdaptive(domain):
     # Clip values between the lower bound and the maximum value.
     clipped_data = np.clip(value, lower, np.max(value))
     clipped_data = clipped_data.tolist()
-    print("domain", domain)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("clipped_data", clipped_data)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("shape", shape)  # Jackie comment: This is for debugging purposes, can be removed later
     return type_checking_return_actual_dtype(domain, clipped_data, shape)
 
 
@@ -84,7 +81,4 @@ def applyClippingDP(domain, clipping, sensitivity, epsilon):
     privatized = []
     for i in range(len(tmpValue)):
         privatized.append(tmpValue[i] + np.random.laplace(loc=0, scale=sensitivity / epsilon))
-    print("domain", domain)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("privatized", privatized)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("shape", shape)  # Jackie comment: This is for debugging purposes, can be removed later
     return type_checking_return_actual_dtype(domain, privatized, shape)

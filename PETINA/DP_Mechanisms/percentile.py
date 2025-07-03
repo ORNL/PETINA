@@ -31,7 +31,4 @@ def percentilePrivacy(domain, percentile):
     # Replace values below the lower bound with zero.
     data = np.where((data >= lower_bound), data, 0)
     data = data.tolist()
-    print("domain", domain)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("data", data)      # Jackie comment: This is for debugging purposes, can be removed later     
-    print("shape", shape)    # Jackie comment: This is for debugging purposes, can be removed later
     return type_checking_return_actual_dtype(domain, data, shape)

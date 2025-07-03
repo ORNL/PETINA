@@ -265,9 +265,6 @@ def histogramEncoding(value):
     t = list(zip(domain, counts))
 
     privatized = [count for _, count in t]
-    print("domain", domain)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("privatized", privatized)  # Jackie comment: This is for debugging purposes, can be removed later 
-    print("shape", shape)  # Jackie comment: This is for debugging purposes, can be removed later
     return type_checking_return_actual_dtype(value, privatized, shape)
 
 
@@ -289,9 +286,6 @@ def histogramEncoding_t(value):
     the_perturbed_answers = [the_perturbation(encode(r, domain)) for r in domain]
     # Estimate the original counts.
     estimated_answers = the_aggregation_and_estimation(the_perturbed_answers)
-    print("value", value)  # Jackie comment: This is for debugging purposes, can be removed later   
-    print("estimated_answers", estimated_answers)  # Jackie comment: This is for debugging purposes, can be removed later
-    print("shape", shape)  # Jackie comment: This is for debugging purposes, can be removed later
     return type_checking_return_actual_dtype(value, estimated_answers, shape)
 
 
@@ -324,7 +318,4 @@ def unaryEncoding(value, p=0.75, q=0.25):
     counts = aggregate(responses, p, q)
     # Zip unique values with their estimated counts.
     t = list(zip(unique_domain, counts))
-    print("responses", responses)  # Jackie comment: This is for debugging purposes, can be removed later   
-    print("counts", counts)      # Jackie comment: This is for debugging purposes, can be removed later
-    print("t", t)                # Jackie comment: This is for debugging purposes, can be removed later
     return t

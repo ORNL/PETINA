@@ -1,105 +1,3 @@
-<!-- 
-# PETINA: Privacy prEservaTIoN Algorithms
-
-**PETINA** is a Python package that provides a comprehensive suite of state-of-the-art differential privacy (DP) algorithms. It supports both supervised and unsupervised learning tasks and handles both numerical and categorical data types. PETINA is designed to be modular and easily integrated into existing machine learning pipelines, addressing common limitations in other libraries, such as limited algorithm diversity or complexity of use.
-
-If you use this package in your work, please cite the appropriate reference from the official OSTI page:  
-[https://www.osti.gov/doecode/biblio/149859](https://www.osti.gov/doecode/biblio/149859)
-
-## Contributors
-
-The PETINA project is developed and maintained by the following contributors:
-
-- **Oliver Kotevska** – KOTEVSKAO@ORNL.GOV – Project Lead  
-- **Trong Nguyen** – NT9@ORNL.GOV – Intern Student  
-
-We welcome new contributors. See the [Contributing](#contributing) section for how to get involved.
-
-
-## Featuresw
-
-PETINA provides the following functionality:
-
-### Differential Privacy Mechanisms
-- Gaussian Mechanism (standard DP)
-- Rényi Differential Privacy (RDP) Gaussian Mechanism
-- Exponential Mechanism
-- Laplace Mechanism
-- Unary Encoding, Histogram Encoding
-- Sparse Vector Technique
-- DP Clipping, DP Pruning, DP Percentile Mechanism
-
-### Sketching Algorithms
-- Count Sketch
-- Fast Projection-Based Sketching
-
-### Adaptive Mechanisms
-- Adaptive Clipping
-- Adaptive Pruning
-
-### Utility Functions
-- Convert between:
-  - Python list ↔ NumPy array
-  - Python list ↔ PyTorch tensor
-- Type casting and validation utilities
-- Compute privacy parameters (p, q) from a given epsilon (ε)
-
-## Installation
-
-### Install via PyPI
-
-```bash
-pip install PETINA
-````
-
-### Install from Source
-
-```bash
-git clone https://github.com/ORNL/PETINA.git
-cd PETINA
-pip install -e .
-```
-
-
-## Quick Start
-
-Here is a minimal example to apply the Gaussian mechanism:
-
-```python
-import numpy as np
-from PETINA import DP_Mechanisms
-
-domain = [1, 2, 13, 4, 5, 11, 21, 3, 14, 5, 10, 12, 4, 16, 7, 18, 10, 30, 20, 15, 27]
-epsilon = 0.1
-delta = 1e-5
-
-print("DP Output =", DP_Mechanisms.applyDPGaussian(domain, delta, epsilon))
-```
-
-
-## More Examples
-
-We provide additional [examples](./PETINA/examples/) in this folder to help you better understand Differential Privacy concepts and how to use the PETINA library effectively.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
-
-## Acknowledgements
-
-This material is based upon work supported by the U.S. Department of Energy, Office of Science, Office of Advanced Scientific Computing Research under Contract No. DE-AC05-00OR22725. This manuscript has been co-authored by UT-Battelle, LLC under Contract No. DE-AC05-00OR22725 with the U.S. Department of Energy. The United States Government retains and the publisher, by accepting the article for publication, acknowledges that the United States Government retains a non-exclusive, paid-up, irrevocable, world-wide license to publish or reproduce the published form of this manuscript, or allow others to do so, for United States Government purposes. The Department of Energy will provide public access to these results of federally sponsored research in accordance with the DOE Public Access Plan (http://energy.gov/downloads/doe-public-access-plan).
-
-
-## Contributing
-
-Contributions to PETINA are welcome.
-
-If you're planning a major change, please open an issue first to discuss it. For smaller changes or fixes, feel free to open a pull request directly.
-
-Make sure to update or add tests if needed.
-
-For questions or to coordinate contributions, you may contact [Dr.Olivera Kotevska](**KOTEVSKAO@ORNL.GOV**) -->
 
 
 # PETINA: Privacy prEservaTIoN Algorithms
@@ -136,18 +34,6 @@ PETINA includes state-of-the-art tools for:
 
 ## Quick Start
 
-Here’s how to use the Gaussian mechanism in just a few lines:
-
-```python
-import numpy as np
-from PETINA import DP_Mechanisms
-
-domain = [1, 2, 13, 4, 5, 11, 21, 3, 14, 5, 10, 12, 4, 16, 7, 18, 10, 30, 20, 15, 27]
-epsilon = 0.1
-delta = 1e-5
-
-print("DP Output =", DP_Mechanisms.applyDPGaussian(domain, delta, epsilon))
-```
 Below is a real world example when adding noise to age of various person
 ```python
 from PETINA import DP_Mechanisms, Encoding_Pertubation, Clipping, Pruning
@@ -180,6 +66,19 @@ print(encoded_ages)
 print("\nSummary:")
 print(f"Original ages: {user_ages}")
 print(f"Noisy ages: {np.round(noisy_ages, 2)}")
+#------OUTPUT------
+# Original ages: [23, 35, 45, 27, 31, 50, 29, 42, 38, 33]
+
+# Noisy ages with Laplace Mechanism:
+# [21.46703958 34.93585449 47.36478841 25.68077936 30.11460444 49.3448666
+#  28.8128474  36.54981691 37.6103979  33.32033856]
+
+# Unary encoded noisy ages:
+# [(33.320338556461415, np.float64(14.023220368761203)), (34.935854491045006, np.float64(5.97677963123879)), (36.54981690878978, np.float64(22.06966110628362)), (37.61039790139999, np.float64(-10.116101843806039)), (47.36478841495265, np.float64(-18.162542581328452)), (49.34486659855414, np.float64(14.023220368761203)), (21.467039579955127, np.float64(-18.162542581328452)), (25.6807793619914, np.float64(-2.069661106283625)), (28.812847396103876, np.float64(5.97677963123879)), (30.114604444236978, np.float64(-10.116101843806039))]
+
+# Summary:
+# Original ages: [23, 35, 45, 27, 31, 50, 29, 42, 38, 33]
+# Noisy ages: [21.47 34.94 47.36 25.68 30.11 49.34 28.81 36.55 37.61 33.32]
 ```
 We also provide hands-on [examples](./PETINA/examples/) in the examples folder.
 
