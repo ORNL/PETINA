@@ -3,7 +3,15 @@ from .core import (
     applyDPGaussian,
     applyRDPGaussian,
     applyDPExponential,
-    applyDPLaplace
+    applyDPLaplace,
+    applyPruning,
+    applyPruningAdaptive,
+    applyPruningDP,
+    centralized_count_mean_sketch,
+    generate_hash_funcs,
+    Client_PETINA_CMS,
+    Server_PETINA_CMS,
+    applyCountSketch
 )
 from .sparse_vector import (
     above_threshold_SVT
@@ -19,5 +27,14 @@ __all__ = [
     "applyDPExponential",
     "applyDPLaplace",
     "above_threshold_SVT",
-    "percentilePrivacy"
+    "applyPruning",
+    "applyPruningAdaptive",
+    "applyPruningDP",  
+    "percentilePrivacy",
+    "centralized_count_mean_sketch",
+    "generate_hash_funcs",
+    "Client_PETINA_CMS",
+    "Server_PETINA_CMS",
+    "applyCountSketch"
 ]
+
