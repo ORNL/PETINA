@@ -109,35 +109,39 @@ def applyDPLaplace(domain, sensitivity=1, epsilon=0.01, gamma=1, accountant=None
     # Convert the processed flattened list back to the original data type and shape.
     return type_checking_return_actual_dtype(domain, privatized, shape)
 
-# def applyDPGaussian(tensor, epsilon_per_param, delta_per_param, accountant=None, sensitivity=1.0):
-#     """
-#     Adds Gaussian noise to a tensor to achieve (epsilon, delta)-differential privacy.
-#     Requires L2 sensitivity.
+def applyDPGaussian(domain, delta=1e-5, epsilon=1.0, gamma=1.0, accountant=None):
+    """
+    Applies Gaussian noise to the input data for differential privacy,
+    and optionally tracks budget via a BudgetAccountant.
 
-#     Args:
-#         tensor (torch.Tensor or np.ndarray): The input data.
-#         epsilon_per_param (float): The epsilon privacy parameter *per parameter*.
-#         delta_per_param (float): The delta privacy parameter *per parameter*.
-#         accountant (BudgetAccountant, optional): The budget accountant to track spend.
-#         sensitivity (float): The L2 sensitivity of the query/function (usually clipping norm).
-    
-#     Returns:
-#         torch.Tensor or np.ndarray: The tensor with added Gaussian noise.
-#     """
-#     # Calculate noise scale (sigma) based on epsilon, delta, and sensitivity
-#     # epsilon_per_param and delta_per_param are the *total* budget for this single parameter addition.
-#     sigma = (sensitivity * np.sqrt(2 * np.log(1.25 / delta_per_param))) / epsilon_per_param
-#     noise = np.random.normal(loc=0, scale=sigma, size=tensor.shape)
+    Parameters:
+        domain: Input data (list, numpy array, or tensor).
+        delta (float): Failure probability (default: 1e-5).
+        epsilon (float): Privacy parameter (default: 1.0).
+        gamma (float): Scaling factor for noise (default: 1.0).
+        accountant (BudgetAccountant, optional): Tracks spend for (ε, δ).
 
-#     # Calculate privacy cost and spend it
-#     if accountant:
-#         cost_epsilon, cost_delta = epsilon_per_param, delta_per_param
-#         # The spend method will now internally check the budget and raise BudgetError if exceeded
-#         accountant.spend(cost_epsilon, cost_delta)
-    
-#     if isinstance(tensor, torch.Tensor):
-#         return tensor + torch.tensor(noise, dtype=tensor.dtype)
-#     return tensor + noise
+    Returns:
+        Data with added Gaussian noise in the same format as the input.
+    """
+    # Flatten to list
+    data, shape = type_checking_and_return_lists(domain)
+
+    # Compute σ for (ε, δ)-Gaussian mechanism
+    sigma = np.sqrt(2 * np.log(1.25 / delta)) * gamma / epsilon
+
+    # Add Gaussian noise
+    privatized = np.array(data) + np.random.normal(loc=0, scale=sigma, size=len(data))
+
+    # Budget accounting
+    if accountant is not None:
+        # Spend the exact (ε, δ) for this invocation
+        accountant.spend(epsilon, delta)
+        # (Optional) debug print
+        print(f"Gaussian: spent ε={epsilon}, δ={delta}; remaining={accountant.remaining()}")
+
+    # Restore to original type/shape
+    return type_checking_return_actual_dtype(domain, privatized, shape)
 
 
 # def applyClipping(tensor, max_norm):

@@ -7,50 +7,7 @@ from scipy import stats as st
 from PETINA.Data_Conversion_Helper import type_checking_and_return_lists, type_checking_return_actual_dtype
 
 
-# -------------------------------
-# Source: The Algorithmic Foundations of Differential Privacy by Cynthia Dwork and Aaron Roth. Foundations and Trends in Theoretical Computer Science.
-# Vol. 9, no. 3–4, pp. 211‐407, Aug. 2014. doi:10.1561/0400000042
-# -------------------------------
-def applyFlipCoin(probability, domain):
-    """
-    Applies a "flip coin" mechanism to each item in the input domain.
-    For each item, with a probability 'probability', the original item is kept.
-    Otherwise, a random integer between the minimum and maximum of the list is used.
-
-    Parameters:
-        probability (float): Probability (between 0 and 1) to keep the original item.
-        domain: Input data (list, numpy array, or tensor).
-
-    Returns:
-        Data with each item either preserved or replaced with a random value,
-        in the same format as the input.
-    """
-    # Ensure the probability is valid.
-    if not 0 <= probability <= 1:
-        raise ValueError("Probability must be between 0 and 1.")
-
-    # Convert input data to list.
-    items, shape = type_checking_and_return_lists(domain)
-
-    # Create a list of boolean values; True with probability 'probability'
-    prob = [np.random.rand() < probability for _ in items]
-
-    result = []
-    # Determine the minimum and maximum values in the list for random replacement.
-    item_min = min(items)
-    item_max = max(items)
-
-    # For each item, decide whether to keep it or replace it with a random value.
-    for p, n in zip(prob, items):
-        if p == True:
-            result.append(n)  # Keep the original value
-        else:
-            result.append(random.randint(item_min, item_max))  # Replace with random integer
-
-    # Convert the result back to the original data type.
-
-    return type_checking_return_actual_dtype(domain, result, shape)
-
+#
 
 # -------------------------------
 # Source: Differential Privacy by Cynthia Dwork, International Colloquium on Automata, Languages and Programming (ICALP) 2006, p. 1–12. doi:10.1007/11787006_1
