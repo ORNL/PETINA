@@ -1,0 +1,57 @@
+Help on function make_laplace in module opendp.measurements:
+
+mmaakkee__llaappllaaccee(input_domain: opendp.mod.Domain, input_metric: opendp.mod.Metric, scale: float, k=None) -> opendp.mod.Measurement
+    Make a Measurement that adds noise from the Laplace(`scale`) distribution to the input.
+    
+    Valid inputs for `input_domain` and `input_metric` are:
+    
+    | `input_domain`                  | input type   | `input_metric`         |
+    | ------------------------------- | ------------ | ---------------------- |
+    | `atom_domain(T)` (default)      | `T`          | `absolute_distance(T)` |
+    | `vector_domain(atom_domain(T))` | `Vec<T>`     | `l1_distance(T)`       |
+    
+    Internally, all sampling is done using the discrete Laplace distribution.
+    
+    
+    Required features: `contrib`
+    
+    [make_laplace in Rust documentation.](https://docs.rs/opendp/0.12.1/opendp/measurements/fn.make_laplace.html)
+    
+    **Citations:**
+    
+    * [GRS12 Universally Utility-Maximizing Privacy Mechanisms](https://theory.stanford.edu/~tim/papers/priv.pdf)
+    * [CKS20 The Discrete Gaussian for Differential Privacy](https://arxiv.org/pdf/2004.00010.pdf#subsection.5.2)
+    
+    **Supporting Elements:**
+    
+    * Input Domain:   `D`
+    * Output Type:    `D::Carrier`
+    * Input Metric:   `D::InputMetric`
+    * Output Measure: `MaxDivergence`
+    
+    :param input_domain: Domain of the data type to be privatized.
+    :type input_domain: Domain
+    :param input_metric: Metric of the data type to be privatized.
+    :type input_metric: Metric
+    :param scale: Noise scale parameter for the Laplace distribution. `scale` == standard_deviation / sqrt(2).
+    :type scale: float
+    :param k: The noise granularity in terms of 2^k, only valid for domains over floats.
+    :rtype: Measurement
+    :raises TypeError: if an argument's type differs from the expected type
+    :raises UnknownTypeException: if a type argument fails to parse
+    :raises OpenDPException: packaged error from the core OpenDP library
+    
+    :example:
+    
+    >>> import opendp.prelude as dp
+    >>> dp.enable_features("contrib")
+    >>> input_space = dp.atom_domain(T=float), dp.absolute_distance(T=float)
+    >>> laplace = dp.m.make_laplace(*input_space, scale=1.0)
+    >>> print('100?', laplace(100.0))
+    100? ...
+    
+    Or, more readably, define the space and then chain:
+    
+    >>> laplace = input_space >> dp.m.then_laplace(scale=1.0)
+    >>> print('100?', laplace(100.0))
+    100? ...

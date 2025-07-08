@@ -22,8 +22,8 @@ from numbers import Integral
 
 import numpy as np
 
-from utils import Budget, BudgetError # Import Budget and BudgetError from utils.py
-from validation import check_epsilon_delta # Import check_epsilon_delta from Validation.py
+from .utils import Budget, BudgetError # Import Budget and BudgetError from utils.py
+from .validation import check_epsilon_delta # Import check_epsilon_delta from Validation.py
 
 
 class BudgetAccountant:
