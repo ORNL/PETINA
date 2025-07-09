@@ -249,12 +249,12 @@ def plot_boxplot(opendp_results, petina_results, true_value, label, epsilon):
 # ----------------------------
 transform = transforms.Compose([transforms.ToTensor()])
 
-mnist_data = datasets.MNIST(root="./data", train=True, download=False, transform=transform)
+mnist_data = datasets.MNIST(root="./data", train=True, download=True, transform=transform)
 images = [mnist_data[i][0].numpy().flatten() for i in range(100)]
 mnist_avg = np.mean([img.mean() for img in images])
 sensitivity_mnist = 1.0 / 100
 
-cifar_data = datasets.CIFAR10(root="./data", train=True, download=False, transform=transform)
+cifar_data = datasets.CIFAR10(root="./data", train=True, download=True, transform=transform)
 cifar_images = [cifar_data[i][0].numpy().flatten() for i in range(100)]
 cifar_avg = np.mean([img.mean() for img in cifar_images])
 sensitivity_cifar = 1.0 / 100
