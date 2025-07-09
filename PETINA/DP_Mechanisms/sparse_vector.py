@@ -26,10 +26,13 @@ def above_threshold_SVT(val, domain, T, epsilon):
         The original value if the condition is met; otherwise, a random value from domain.
     """
     possible_val_list, shape = type_checking_and_return_lists(domain)
+
     T_hat = T + np.random.laplace(loc=0, scale=2 / epsilon)  # Noisy threshold
 
     nu_i = np.random.laplace(loc=0, scale=4 / epsilon)  # Noise added to the value
     if val + nu_i >= T_hat:
         return val
+    
+    
     # Fallback: return a random value if the threshold condition is not met.
     return random.choice(possible_val_list)
