@@ -1,4 +1,6 @@
 from .core import (
+
+    applyFlipCoin,
     applyDPGaussian,
     applyRDPGaussian,
     applyDPExponential,
@@ -20,6 +22,7 @@ from .percentile import (
 )   
 
 __all__ = [
+    "applyFlipCoin",
     "applyDPGaussian",
     "applyRDPGaussian",
     "applyDPExponential",

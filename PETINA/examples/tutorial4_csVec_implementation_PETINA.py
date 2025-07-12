@@ -1,4 +1,4 @@
-from PETINA import Sketching
+from PETINA import DP_Mechanisms
 import numpy as np
 # -------------------------------
 import math
@@ -30,9 +30,9 @@ rows = 10
 cols = 1024
 
 # Apply the Count Sketch to each data type.
-sketched_list = Sketching.applyCountSketch(data_list, rows, cols)
-sketched_np = Sketching.applyCountSketch(data_np, rows, cols)
-sketched_torch = Sketching.applyCountSketch(data_torch, rows, cols)
+sketched_list = DP_Mechanisms.applyCountSketch(data_list, rows, cols)
+sketched_np = DP_Mechanisms.applyCountSketch(data_np, rows, cols)
+sketched_torch = DP_Mechanisms.applyCountSketch(data_torch, rows, cols)
 
 # Print the results to see the approximation.
 print("\n--- Results ---")

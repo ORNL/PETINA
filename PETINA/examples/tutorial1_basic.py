@@ -1,7 +1,7 @@
 # File: summer_2025/improving_petina/PETINA/PETINA/examples/tutorial1_basic.py
 
 # --- Import necessary modules ---
-from PETINA import DP_Mechanisms, Encoding_Pertubation, Clipping, Pruning
+from PETINA import DP_Mechanisms, Encoding_Pertubation, Clipping
 import numpy as np
 import random
 
@@ -60,13 +60,13 @@ print(Clipping.applyClippingAdaptive(domain))
 # --- Pruning Techniques ---
 print("\n=== Pruning ===")
 print("Fixed pruning (threshold=0.8):")
-print(Pruning.applyPruning(domain, 0.8))
+print(DP_Mechanisms.applyPruning(domain, 0.8))
 
 print("Adaptive pruning:")
-print(Pruning.applyPruningAdaptive(domain))
+print(DP_Mechanisms.applyPruningAdaptive(domain))
 
 print("Pruning with DP (threshold=0.8):")
-print(Pruning.applyPruningDP(domain, 0.8, sensitivity, epsilon))
+print(DP_Mechanisms.applyPruningDP(domain, 0.8, sensitivity, epsilon))
 
 # --- Utility Functions for Parameters ---
 print("\n=== Utility Functions ===")

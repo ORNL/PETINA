@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 import warnings
 from torch.utils.data import DataLoader, TensorDataset
-from PETINA import BudgetAccountant, Budget, BudgetError,Sketching,CSVec
+from PETINA import BudgetAccountant, Budget, BudgetError,DP_Mechanisms,CSVec
 
 # -------------------------------
 # Data Conversion Helper Functions (Keep these as they are)
@@ -109,7 +109,7 @@ def applyDPLaplace(domain, sensitivity=1, epsilon=0.01, gamma=1, accountant=None
     # Convert the processed flattened list back to the original data type and shape.
     return type_checking_return_actual_dtype(domain, privatized, shape)
 
-def applyDPGaussian(domain, delta=1e-5, epsilon=1.0, gamma=1.0, accountant=None):
+def applyDPGaussian(domain, delta=1e-5, epsilon=0.1, gamma=1.0, accountant=None):
     """
     Applies Gaussian noise to the input data for differential privacy,
     and optionally tracks budget via a BudgetAccountant.
@@ -244,44 +244,49 @@ def client_update(client_model, optimizer, train_loader, epoch=5, use_privacy=Fa
                                 applyDPLaplace(param.grad,sensitivity=clipping_norm, accountant=accountant)
                                 
                     elif privacy_method == 'gaussian':
-                        # Distribute delta budget over all parameters and all batches in the client update.
-                        # This assumes non-adaptive composition within the client update.
-                        # The total delta from the accountant is assumed to be shared across all such calls.
-                        # We are passing the `epsilon_per_param` and `delta_per_param` to `applyDPGaussian`.
-                        
-                        # This specific calculation for delta_per_param requires careful thought about overall budget.
-                        # A simpler way often is to have a fixed epsilon/delta for EACH gradient addition.
-                        # For this example, we will calculate delta per parameter per batch.
-                        
-                        # Total gradient additions = epochs * num_batches_per_epoch * total_params
-                        total_gradient_ops = epoch * num_batches_per_epoch * total_params
-                        
-                        # Use a small default delta if the remaining budget's delta is 0 or too small.
-                        # This prevents division by zero or extremely large epsilon costs.
-                        remaining_budget = accountant.remaining()
-                        if remaining_budget.delta > 0:
-                            delta_for_gaussian_cost = remaining_budget.delta / total_gradient_ops
-                        else:
-                            # Fallback if remaining delta is zero, just to allow calculation to proceed for demo.
-                            # In a real scenario, this means no more delta budget.
-                            delta_for_gaussian_cost = 1e-10 # A tiny non-zero delta
-
-                        if delta_for_gaussian_cost <= 0:
-                            raise BudgetError("Calculated delta per parameter is zero or negative, cannot apply Gaussian noise.")
-                        
-                        # `noise_multiplier` is `sigma` for Gaussian here.
-                        sigma = noise_multiplier
-                        
-                        # Calculate epsilon for this (sigma, sensitivity, delta_per_param)
-                        # epsilon = (sensitivity * sqrt(2 * log(1.25 / delta))) / sigma
-                        epsilon_for_gaussian_cost = (clipping_norm * np.sqrt(2 * np.log(1.25 / delta_for_gaussian_cost))) / sigma
-                        
+                        # The `noise_multiplier` is used as sigma in Gaussian, so we need to calculate epsilon if budget tracking is strict.
+                        # For simplicity, treat `noise_multiplier` as sigma and reuse delta from the accountant.
                         for param in client_model.parameters():
                             if param.grad is not None:
-                                # Apply the noise. Note: noise_multiplier is sigma.
-                                param.grad.copy_(add_noise_to_update(param.grad, noise_multiplier))
-                                # Now spend the calculated cost for this specific parameter's noise addition.
-                                accountant.spend(epsilon_for_gaussian_cost, delta_for_gaussian_cost)
+                                applyDPGaussian(param.grad, delta=accountant.delta, epsilon=noise_multiplier, gamma=clipping_norm, accountant=accountant)
+                        # # Distribute delta budget over all parameters and all batches in the client update.
+                        # # This assumes non-adaptive composition within the client update.
+                        # # The total delta from the accountant is assumed to be shared across all such calls.
+                        # # We are passing the `epsilon_per_param` and `delta_per_param` to `applyDPGaussian`.
+                        
+                        # # This specific calculation for delta_per_param requires careful thought about overall budget.
+                        # # A simpler way often is to have a fixed epsilon/delta for EACH gradient addition.
+                        # # For this example, we will calculate delta per parameter per batch.
+                        
+                        # # Total gradient additions = epochs * num_batches_per_epoch * total_params
+                        # total_gradient_ops = epoch * num_batches_per_epoch * total_params
+                        
+                        # # Use a small default delta if the remaining budget's delta is 0 or too small.
+                        # # This prevents division by zero or extremely large epsilon costs.
+                        # remaining_budget = accountant.remaining()
+                        # if remaining_budget.delta > 0:
+                        #     delta_for_gaussian_cost = remaining_budget.delta / total_gradient_ops
+                        # else:
+                        #     # Fallback if remaining delta is zero, just to allow calculation to proceed for demo.
+                        #     # In a real scenario, this means no more delta budget.
+                        #     delta_for_gaussian_cost = 1e-10 # A tiny non-zero delta
+
+                        # if delta_for_gaussian_cost <= 0:
+                        #     raise BudgetError("Calculated delta per parameter is zero or negative, cannot apply Gaussian noise.")
+                        
+                        # # `noise_multiplier` is `sigma` for Gaussian here.
+                        # sigma = noise_multiplier
+                        
+                        # # Calculate epsilon for this (sigma, sensitivity, delta_per_param)
+                        # # epsilon = (sensitivity * sqrt(2 * log(1.25 / delta))) / sigma
+                        # epsilon_for_gaussian_cost = (clipping_norm * np.sqrt(2 * np.log(1.25 / delta_for_gaussian_cost))) / sigma
+                        
+                        # for param in client_model.parameters():
+                        #     if param.grad is not None:
+                        #         # Apply the noise. Note: noise_multiplier is sigma.
+                        #         param.grad.copy_(add_noise_to_update(param.grad, noise_multiplier))
+                        #         # Now spend the calculated cost for this specific parameter's noise addition.
+                        #         accountant.spend(epsilon_for_gaussian_cost, delta_for_gaussian_cost)
 
                 except BudgetError as e:
                     print(f"\n--- Budget Exhausted! Stopping local training gracefully. ---")
@@ -454,7 +459,7 @@ def run_federated_learning(
                 accountant=accountant
             )
             round_losses.append(loss)
-            
+            print()
             # Check if budget was exhausted during this client's update
             if loss is None: # client_update returns None on BudgetError
                 print(f"Budget exhausted during client {i+1} update. Stopping FL simulation.")
@@ -514,8 +519,8 @@ if __name__ == "__main__":
     clipping_norm = 1.0 # Gradient clipping norm (sensitivity)
     
     # Differential Privacy parameters for the entire simulation (total budget)
-    total_epsilon_budget = 2
-    total_delta_budget = 1e-5 # Typical small delta for Gaussian DP
+    total_epsilon_budget = 5000
+    total_delta_budget = 1 # Typical small delta for Gaussian DP
 
     # Noise multiplier for the DP mechanisms (this is related to the per-step epsilon/sigma)
     # For Laplace: this is the epsilon per parameter.
@@ -539,22 +544,22 @@ if __name__ == "__main__":
         noise_multiplier=0.01 # Epsilon per parameter in Laplace
     )
 
-    # # --- Run with Gaussian Noise ---
-    # print("\n\n=============== Running with Gaussian Noise ===============")
-    # run_federated_learning(
-    #     sketch_column=sketch_column,
-    #     sketch_row=sketch_row,
-    #     num_selected=num_selected,
-    #     total_epsilon=total_epsilon_budget,
-    #     total_delta=total_delta_budget,
-    #     method='gaussian',
-    #     num_clients=num_clients,
-    #     num_rounds=num_rounds,
-    #     epochs=epochs,
-    #     batch_size=batch_size,
-    #     clipping_norm=clipping_norm,
-    #     noise_multiplier=0.5 # Sigma for Gaussian noise
-    # )
+    # --- Run with Gaussian Noise ---
+    print("\n\n=============== Running with Gaussian Noise ===============")
+    run_federated_learning(
+        sketch_column=sketch_column,
+        sketch_row=sketch_row,
+        num_selected=num_selected,
+        total_epsilon=total_epsilon_budget,
+        total_delta=total_delta_budget,
+        method='gaussian',
+        num_clients=num_clients,
+        num_rounds=num_rounds,
+        epochs=epochs,
+        batch_size=batch_size,
+        clipping_norm=clipping_norm,
+        noise_multiplier=0.001 # Sigma for Gaussian noise
+    )
 
     # --- Run with Count Sketch (as communication efficiency) ---
     # print("\n\n=============== Running with Count Sketch (as communication efficiency) ===============")
