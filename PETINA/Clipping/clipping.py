@@ -1,84 +1,68 @@
-import math
-import random
-import torch
+# Clipping Module for PETINA
 import numpy as np
-from scipy import stats as st
-
 from PETINA.Data_Conversion_Helper import type_checking_and_return_lists, type_checking_return_actual_dtype
 
 # -------------------------------
-# Clipping Functions
-# Source: https://arxiv.org/pdf/2311.06839.pdf
-# Implementation: https://neptune.ai/blog/understanding-gradient-clipping-and-how-it-can-fix-exploding-gradients-problem
+# Simple Clipping
 # -------------------------------
-def applyClipping(value, clipping):
+def applyClipping(values, clipping_threshold):
     """
-    Applies simple clipping to each element in the list.
-    If a value is above the clipping threshold, it is set to the threshold.
+    Clips values at the given clipping threshold.
 
     Parameters:
-        value (list): A list of numerical values.
-        clipping (float): The clipping threshold.
+        values (list or np.array): List or array of numerical values.
+        clipping_threshold (float): The max threshold for clipping.
 
     Returns:
-        A list of clipped values.
+        List of clipped values.
     """
-    clipped = []
-    for i in range(len(value)):
-        if value[i] >= clipping:
-            clipped.append(clipping)
-        else:
-            clipped.append(value[i])
-    return clipped
+    values = np.array(values)
+    clipped = np.minimum(values, clipping_threshold)
+    return clipped.tolist()
 
 
 # -------------------------------
-# Source: https://arxiv.org/pdf/2311.06839.pdf
+# Adaptive Clipping based on quantile
 # -------------------------------
 def applyClippingAdaptive(domain):
     """
-    Applies adaptive clipping based on the lower 5th percentile of the data.
-    This ensures that the lower tail of the distribution is used as a clipping threshold.
-
-    Parameters:
-        domain: Input data (list, array-like, or tensor).
-
-    Returns:
-        Data with adaptive clipping applied, in the same format as the input.
-    """
-    value, shape = type_checking_and_return_lists(domain)
-
-    lower_quantile = 0.05
-    lower = np.quantile(value, lower_quantile)
-
-    # Clip values between the lower bound and the maximum value.
-    clipped_data = np.clip(value, lower, np.max(value))
-    clipped_data = clipped_data.tolist()
-    return type_checking_return_actual_dtype(domain, clipped_data, shape)
-
-
-# -------------------------------
-# Clipping Functions
-# Source: https://neptune.ai/blog/understanding-gradient-clipping-and-how-it-can-fix-exploding-gradients-problem
-# Implementation: https://medium.com/pytorch/differential-privacy-series-part-1-dp-sgd-algorithm-explained-12512c3959a3
-# -------------------------------
-def applyClippingDP(domain, clipping, sensitivity, epsilon):
-    """
-    Applies clipping with differential privacy.
-    First, values are clipped; then Laplace noise is added.
+    Applies adaptive clipping using the 5th percentile as lower bound
+    and the max value as upper bound.
 
     Parameters:
         domain: Input data (list, numpy array, or tensor).
-        clipping (float): Clipping threshold.
-        sensitivity (float): Sensitivity of the data.
-        epsilon (float): Privacy parameter.
 
     Returns:
-        Data with differentially private clipping applied.
+        Data with adaptive clipping applied in original format.
     """
-    value, shape = type_checking_and_return_lists(domain)
-    tmpValue = applyClipping(value, clipping)
-    privatized = []
-    for i in range(len(tmpValue)):
-        privatized.append(tmpValue[i] + np.random.laplace(loc=0, scale=sensitivity / epsilon))
-    return type_checking_return_actual_dtype(domain, privatized, shape)
+    values, shape = type_checking_and_return_lists(domain)
+    lower_quantile = 0.05
+    lower_bound = np.quantile(values, lower_quantile)
+    upper_bound = np.max(values)
+
+    clipped = np.clip(values, lower_bound, upper_bound)
+    return type_checking_return_actual_dtype(domain, clipped.tolist(), shape)
+
+
+# -------------------------------
+# Clipping with Differential Privacy (Laplace noise)
+# -------------------------------
+def applyClippingDP(domain, clipping_threshold, sensitivity, epsilon):
+    """
+    Clips values then adds Laplace noise for differential privacy.
+
+    Parameters:
+        domain: Input data (list, numpy array, or tensor).
+        clipping_threshold (float): Clipping threshold.
+        sensitivity (float): Sensitivity of the data.
+        epsilon (float): Privacy budget.
+
+    Returns:
+        Differentially private clipped data in original format.
+    """
+    values, shape = type_checking_and_return_lists(domain)
+    clipped_values = applyClipping(values, clipping_threshold)
+    noise_scale = sensitivity / epsilon
+    noise = np.random.laplace(loc=0, scale=noise_scale, size=len(clipped_values))
+    privatized = np.array(clipped_values) + noise
+    return type_checking_return_actual_dtype(domain, privatized.tolist(), shape)
