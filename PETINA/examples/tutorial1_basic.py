@@ -1,5 +1,3 @@
-# File: summer_2025/improving_petina/PETINA/PETINA/examples/tutorial1_basic.py
-
 # --- Import necessary modules ---
 from PETINA import DP_Mechanisms, Encoding_Pertubation, Clipping
 import numpy as np
@@ -31,11 +29,6 @@ print("DP =", DP_Mechanisms.applyDPGaussian(domain, delta, epsilon, gamma))
 print("\n=== Exponential Mechanism ===")
 print("DP =", DP_Mechanisms.applyDPExponential(domain, sensitivity, epsilon, gamma))
 
-print("\n=== Sparse Vector Technique (Above Threshold SVT) ===")
-print("DP =", DP_Mechanisms.above_threshold_SVT(0.3, domain, T=0.5, epsilon=epsilon))
-
-print("\n=== Percentile Privacy ===")
-print("Percentile Privacy =", DP_Mechanisms.percentilePrivacy(domain, 10))
 
 # --- Encoding Techniques ---
 print("\n=== Unary Encoding ===")
