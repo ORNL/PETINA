@@ -15,23 +15,21 @@ from PETINA.Data_Conversion_Helper import type_checking_and_return_lists, type_c
 # Source: The Algorithmic Foundations of Differential Privacy by Cynthia Dwork and Aaron Roth. Foundations and Trends in Theoretical Computer Science.
 # -------------------------------
 
+
 def perturb_bit(bit, p, q):
     """
-    Perturbs a single bit using random response.
+    Randomized response perturbation for a single bit.
 
-    Parameters:
-        bit (int): The binary bit (0 or 1).
-        p (float): Probability of keeping 1 as 1.
-        q (float): Probability of flipping 0 to 1.
+    Args:
+        bit (int): Original bit (0 or 1).
+        p (float): Probability of keeping bit 1 as 1.
+        q (float): Probability of flipping bit 0 to 1.
 
     Returns:
-        The perturbed bit.
+        int: Perturbed bit.
     """
-    sample = np.random.random()  # Generate a random float in [0, 1)
-    if bit == 1:
-        return 1 if sample <= p else 0
-    elif bit == 0:
-        return 1 if sample <= q else 0
+    sample = np.random.random()
+    return 1 if (bit == 1 and sample <= p) or (bit == 0 and sample <= q) else 0
 
 
 def perturb(encoded_response, p, q):
@@ -58,11 +56,9 @@ def get_q(p, eps):
         eps (float): Privacy parameter.
 
     Returns:
-        q (float): Computed probability.
+        float: Computed q.
     """
-    qinv = 1 + (math.exp(eps) * (1.0 - p) / p)
-    q = 1.0 / qinv
-    return q
+    return 1 / (1 + (math.exp(eps) * (1 - p) / p))
 
 
 def get_gamma_sigma(p, eps):
@@ -77,12 +73,10 @@ def get_gamma_sigma(p, eps):
         gamma (float): Threshold value derived from the inverse survival function.
         sigma (float): Noise scaling factor.
     """
-    qinv = 1 + (math.exp(eps) * (1.0 - p) / p)
-    q = 1.0 / qinv
-    gamma = st.norm.isf(q)  # Inverse survival function of standard normal
-    # Compute conditional expectation adjustments.
-    unnorm_mu = st.norm.pdf(gamma) * (-(1.0 - p) / st.norm.cdf(gamma) + p / st.norm.sf(gamma))
-    sigma = 1.0 / unnorm_mu
+    q = get_q(p, eps)
+    gamma = st.norm.isf(q)
+    unnorm_mu = st.norm.pdf(gamma) * (-(1 - p) / st.norm.cdf(gamma) + p / st.norm.sf(gamma))
+    sigma = 1 / unnorm_mu
     return gamma, sigma
 
 
@@ -98,18 +92,11 @@ def get_p(eps, return_sigma=False):
     Returns:
         Optimal p value (and sigma if return_sigma is True).
     """
+    
     plist = np.arange(0.01, 1.0, 0.01)
-    glist = []
-    slist = []
-    for p in plist:
-        gamma, sigma = get_gamma_sigma(p, eps)
-        glist.append(gamma)
-        slist.append(sigma)
-    ii = np.argmin(slist)
-    if return_sigma:
-        return plist[ii], slist[ii]
-    else:
-        return plist[ii]
+    sigmas = [get_gamma_sigma(p, eps)[1] for p in plist]
+    idx = np.argmin(sigmas)
+    return (plist[idx], sigmas[idx]) if return_sigma else plist[idx]
 
 
 def aggregate(responses, p=0.75, q=0.25):
@@ -128,6 +115,7 @@ def aggregate(responses, p=0.75, q=0.25):
     n = len(responses)
     # Adjust the sums to compensate for the random response mechanism.
     return [(v - n * q) / (p - q) for v in sums]
+
 
 
 def the_aggregation_and_estimation(answers, epsilon=0.1, theta=1.0):
@@ -151,6 +139,7 @@ def the_aggregation_and_estimation(answers, epsilon=0.1, theta=1.0):
 
     # Adjust the sums to recover the original counts.
     return [int((i - n * q) / (p - q)) for i in sums]
+
 
 
 def she_perturb_bit(bit, epsilon=0.1):
@@ -249,24 +238,19 @@ def unary_epsilon(p, q):
 # -------------------------------
 def histogramEncoding(value):
     """
-    Implements histogram encoding with differential privacy using Laplace perturbation.
+    Histogram encoding with Laplace perturbation.
 
-    Parameters:
-        value: Input data (list, numpy array, or tensor).
+    Args:
+        value: Input data (list, ndarray, or tensor).
 
     Returns:
-        Privatized counts corresponding to the input data.
+        Perturbed counts matching input format.
     """
     domain, shape = type_checking_and_return_lists(value)
-
-    # Perturb the one-hot encoded responses for each element.
     responses = [she_perturbation(encode(r, domain)) for r in domain]
     counts = aggregate(responses)
-    t = list(zip(domain, counts))
-
-    privatized = [count for _, count in t]
+    privatized = [count for _, count in zip(domain, counts)]
     return type_checking_return_actual_dtype(value, privatized, shape)
-
 
 # -------------------------------
 # Source: https://livebook.manning.com/book/privacy-preserving-machine-learning/chapter-4/v-4/103
@@ -282,11 +266,9 @@ def histogramEncoding_t(value):
         Estimated counts derived from the perturbed responses.
     """
     domain, shape = type_checking_and_return_lists(value)
-    # Apply threshold-based perturbation to the one-hot encoding.
-    the_perturbed_answers = [the_perturbation(encode(r, domain)) for r in domain]
-    # Estimate the original counts.
-    estimated_answers = the_aggregation_and_estimation(the_perturbed_answers)
-    return type_checking_return_actual_dtype(value, estimated_answers, shape)
+    perturbed_answers = [the_perturbation(encode(r, domain)) for r in domain]
+    estimated = the_aggregation_and_estimation(perturbed_answers)
+    return type_checking_return_actual_dtype(value, estimated, shape)
 
 
 # -------------------------------
@@ -307,15 +289,8 @@ def unaryEncoding(value, p=0.75, q=0.25):
     Returns:
         A list of tuples pairing each unique value with its privatized count.
     """
-    # Convert input data to list.
     domain, _ = type_checking_and_return_lists(value)
-    # Get unique values in the domain.
     unique_domain = list(set(domain))
-
-    # For each value, encode and perturb it.
     responses = [perturb(encode(r, unique_domain), p, q) for r in domain]
-    # Aggregate perturbed responses.
     counts = aggregate(responses, p, q)
-    # Zip unique values with their estimated counts.
-    t = list(zip(unique_domain, counts))
-    return t
+    return list(zip(unique_domain, counts))
