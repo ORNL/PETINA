@@ -7,7 +7,6 @@ from .core import (
     applyPruning,
     applyPruningAdaptive,
     applyPruningDP,
-    generate_hash_funcs,
     applyCountSketch
 )
 
@@ -20,7 +19,6 @@ __all__ = [
     "applyPruning",
     "applyPruningAdaptive",
     "applyPruningDP",  
-    "generate_hash_funcs",
     "applyCountSketch"
 ]
 

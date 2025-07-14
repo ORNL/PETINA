@@ -46,10 +46,13 @@ def applyFlipCoin(probability, domain):
 
     # Convert the result back to the original data type.
     return type_checking_return_actual_dtype(domain, result, shape)
+
+
 # -------------------------------
 # Source: Differential Privacy by Cynthia Dwork, International Colloquium on Automata, Languages and Programming (ICALP) 2006, p. 1–12. doi:10.1007/11787006_1
 # -------------------------------
-def applyDPGaussian(domain, delta=10e-5, epsilon=1, gamma=1):
+
+def applyDPGaussian(domain, delta=1e-5, epsilon=1.0, gamma=1.0):
     """
     Applies Gaussian noise to the input data for differential privacy.
 
@@ -57,77 +60,75 @@ def applyDPGaussian(domain, delta=10e-5, epsilon=1, gamma=1):
         domain: Input data (list, numpy array, or tensor).
         delta (float): Failure probability (default: 1e-5).
         epsilon (float): Privacy parameter (default: 1.0).
-        gamma (float): Scaling factor for noise (default: 1).
+        gamma (float): Scaling factor for noise (default: 1.0).
 
     Returns:
         Data with added Gaussian noise in the same format as the input.
     """
     data, shape = type_checking_and_return_lists(domain)
 
-    # Calculate the standard deviation for the Gaussian noise.
     sigma = np.sqrt(2 * np.log(1.25 / delta)) * gamma / epsilon
-    # Add Gaussian noise to each data point.
-    privatized = data + np.random.normal(loc=0, scale=sigma, size=len(data))
-    return type_checking_return_actual_dtype(domain, privatized, shape)
+    noise = np.random.normal(loc=0, scale=sigma, size=len(data))
+    privatized = np.array(data) + noise
 
+    return type_checking_return_actual_dtype(domain, privatized.tolist(), shape)
 
 # -------------------------------
 # Source: Ilya Mironov. Renyi differential privacy. In Computer Security Foundations Symposium (CSF), 2017 IEEE 30th, 263–275. IEEE, 2017.
 # -------------------------------
-def applyRDPGaussian(domain, sensitivity=1, alpha=10, epsilon_bar=1):
+
+def applyRDPGaussian(domain, sensitivity=1.0, alpha=10.0, epsilon_bar=1.0):
     """
     Applies Gaussian noise using the Rényi Differential Privacy (RDP) mechanism.
 
     Parameters:
         domain: Input data (list, numpy array, or tensor).
-        sensitivity (float): Sensitivity of the data (default: 1).
-        alpha (float): RDP parameter (default: 10).
-        epsilon_bar (float): Privacy parameter (default: 1).
+        sensitivity (float): Sensitivity of the data (default: 1.0).
+        alpha (float): RDP parameter (default: 10.0).
+        epsilon_bar (float): Privacy parameter (default: 1.0).
 
     Returns:
         Data with added Gaussian noise.
     """
     data, shape = type_checking_and_return_lists(domain)
-    # Calculate sigma based on sensitivity, alpha, and epsilon_bar.
-    sigma = np.sqrt((sensitivity**2 * alpha) / (2 * epsilon_bar))
-    # Add Gaussian noise for each element.
-    privatized = [v + np.random.normal(loc=0, scale=sigma) for v in data]
+    
+    sigma = np.sqrt((sensitivity ** 2 * alpha) / (2 * epsilon_bar))
+    noise = np.random.normal(loc=0, scale=sigma, size=len(data))
+    privatized = np.array(data) + noise
 
-    return type_checking_return_actual_dtype(domain, privatized, shape)
+    return type_checking_return_actual_dtype(domain, privatized.tolist(), shape)
+
 
 
 # -------------------------------
 # Source: Mark Bun and Thomas Steinke. Concentrated differential privacy: simplifications, extensions, and lower bounds. In Theory of Cryptography Conference, 635–658. Springer, 2016.
 # -------------------------------
-def applyDPExponential(domain, sensitivity=1, epsilon=1, gamma=1.0):
+
+def applyDPExponential(domain, sensitivity=1.0, epsilon=1.0, gamma=1.0):
     """
     Applies exponential noise to the input data for differential privacy.
 
     Parameters:
         domain: Input data (list, numpy array, or tensor).
-        sensitivity: Maximum change by a single individual's data (default: 1).
-        epsilon: Privacy parameter (default: 1).
-        gamma: Scaling factor for noise (default: 1.0).
+        sensitivity (float): Maximum change by a single individual's data (default: 1.0).
+        epsilon (float): Privacy parameter (default: 1.0).
+        gamma (float): Scaling factor for noise (default: 1.0).
 
     Returns:
         Data with added exponential noise in the same format as the input.
     """
     data, shape = type_checking_and_return_lists(domain)
 
-    # Determine the scale for the exponential distribution.
     scale = sensitivity * gamma / epsilon
 
-    # Generate exponential noise and randomly flip its sign to create a symmetric noise distribution.
-    noise = np.random.exponential(scale, size=len(data))
+    # Generate symmetric exponential noise by sampling exponential and randomly flipping signs
+    noise = np.random.exponential(scale=scale, size=len(data))
     signs = np.random.choice([-1, 1], size=len(data))
-    noise = noise * signs
+    noise *= signs
 
-    # Add the noise to the original data.
     privatized = np.array(data) + noise
 
-    # Convert the result back to a list.
-    privatized = privatized.tolist()
-    return type_checking_return_actual_dtype(domain, privatized, shape)
+    return type_checking_return_actual_dtype(domain, privatized.tolist(), shape)
 
 
 # -------------------------------
@@ -135,29 +136,33 @@ def applyDPExponential(domain, sensitivity=1, epsilon=1, gamma=1.0):
 # In Proceedings of the Third Conference on Theory of Cryptography, TCC'06, 265–284. Berlin, Heidelberg, 2006. Springer-Verlag.
 # URL: https://doi.org/10.1007/11681878_14, doi:10.1007/11681878_14.
 # -------------------------------
-def applyDPLaplace(domain, sensitivity=1, epsilon=1, gamma=1):
+
+def applyDPLaplace(domain, sensitivity=1.0, epsilon=1.0, gamma=1.0):
     """
     Applies Laplace noise to the input data for differential privacy.
 
     Parameters:
         domain: Input data (list, numpy array, or tensor).
-        sensitivity: Maximum change by a single individual's data (default: 1).
-        epsilon: Privacy parameter (default: 1).
-        gamma: Scaling factor for noise (default: 1).
+        sensitivity (float): Maximum change by a single individual's data (default: 1.0).
+        epsilon (float): Privacy parameter (default: 1.0).
+        gamma (float): Scaling factor for noise (default: 1.0).
 
     Returns:
         Data with added Laplace noise in the same format as the input.
     """
     data, shape = type_checking_and_return_lists(domain)
-    # Add Laplace noise to each element.
-    privatized = data + np.random.laplace(loc=0, scale=sensitivity * gamma / epsilon, size=len(data))
+    scale = sensitivity * gamma / epsilon
+    noise = np.random.laplace(loc=0, scale=scale, size=len(data))
+    privatized = data + noise
     return type_checking_return_actual_dtype(domain, privatized, shape)
+
 
 # -------------------------------
 # Pruning Functions
 # Source: https://arxiv.org/pdf/2311.06839.pdf
 # Implementation: https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123700324.pdf
 # -------------------------------
+
 def applyPruning(domain, prune_ratio):
     """
     Applies pruning to reduce the magnitude of values.
@@ -172,22 +177,21 @@ def applyPruning(domain, prune_ratio):
     """
     value, shape = type_checking_and_return_lists(domain)
     pruned = []
-    for i in range(len(value)):
-        if abs(value[i]) < prune_ratio:
+    for v in value:
+        if abs(v) < prune_ratio:
             rnd_tmp = random.random()
-            if abs(value[i]) > rnd_tmp * prune_ratio:
-                # Set to prune_ratio preserving the sign.
-                if value[i] > 0:
-                    pruned.append(prune_ratio)
-                else:
-                    pruned.append(-prune_ratio)
+            if abs(v) > rnd_tmp * prune_ratio:
+                pruned.append(prune_ratio if v > 0 else -prune_ratio)
             else:
                 pruned.append(0)
+        else:
+            pruned.append(v)  # Keep original if not below prune_ratio
     return type_checking_return_actual_dtype(domain, pruned, shape)
 
 # -------------------------------
 # Source: https://arxiv.org/pdf/2311.06839.pdf
 # -------------------------------
+
 def applyPruningAdaptive(domain):
     """
     Applies adaptive pruning by determining a dynamic prune ratio.
@@ -202,21 +206,22 @@ def applyPruningAdaptive(domain):
     value, shape = type_checking_and_return_lists(domain)
     pruned = []
     prune_ratio = max(value) + 0.1  # Dynamic prune ratio
-    for i in range(len(value)):
-        if abs(value[i]) < prune_ratio:
+    for v in value:
+        if abs(v) < prune_ratio:
             rnd_tmp = random.random()
-            if abs(value[i]) > rnd_tmp * prune_ratio:
-                if value[i] > 0:
-                    pruned.append(prune_ratio)
-                else:
-                    pruned.append(-prune_ratio)
+            if abs(v) > rnd_tmp * prune_ratio:
+                pruned.append(prune_ratio if v > 0 else -prune_ratio)
             else:
                 pruned.append(0)
+        else:
+            pruned.append(v)  # Keep original if not below prune_ratio
     return type_checking_return_actual_dtype(domain, pruned, shape)
+
 
 # -------------------------------
 # Source: https://arxiv.org/pdf/2311.06839.pdf
 # -------------------------------
+
 def applyPruningDP(domain, prune_ratio, sensitivity, epsilon):
     """
     Applies pruning with differential privacy.
@@ -232,33 +237,15 @@ def applyPruningDP(domain, prune_ratio, sensitivity, epsilon):
         Differentially private pruned data.
     """
     value, shape = type_checking_and_return_lists(domain)
-    tmpValue = applyPruning(value, prune_ratio)
-    privatized = []
-    for i in range(len(tmpValue)):
-        privatized.append(tmpValue[i] + np.random.laplace(loc=0, scale=sensitivity / epsilon))
-    return type_checking_return_actual_dtype(domain, privatized, shape)
+    pruned_values = applyPruning(value, prune_ratio)
+    noise_scale = sensitivity / epsilon
+    # Add Laplace noise vectorized for efficiency
+    noise = np.random.laplace(loc=0, scale=noise_scale, size=len(pruned_values))
+    privatized = np.array(pruned_values) + noise
+    return type_checking_return_actual_dtype(domain, privatized.tolist(), shape)
+
 
 #-----------Jackie work ---------
-# -------------------------------
-# Source: https://github.com/Samuel-Maddock/pure-LDP/tree/master/pure_ldp/frequency_oracles/apple_cms
-# Source: https://machinelearning.apple.com/research/learning-with-privacy-at-scale
-# -------------------------------
-
-# Helper function to generate hash functions for CMS
-def generate_hash_funcs(k, m):
-    # In a real scenario, these would be cryptographically secure hash functions
-    # For CMS, we need hash functions that map to {0, ..., m-1}
-    # For simplicity, we'll use a random seed for each hash function
-    hash_funcs = []
-    for _ in range(k):
-        # Using Python's built-in hash for simplicity, but it's not cryptographically secure
-        # For actual LDP, you'd use universal hash families
-        seed = random.randint(0, 1000000)
-        hash_funcs.append(lambda x, seed=seed, m=m: (hash(str(x) + str(seed))) % m)
-    return hash_funcs
-
-
-
 
 # -------------------------------
 # Source: https://github.com/nikitaivkin/csh#
