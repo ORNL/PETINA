@@ -13,24 +13,35 @@
 
 PETINA includes state-of-the-art tools for:
 
-###  Differential Privacy Mechanisms
-- Laplace, Gaussian, and Exponential Mechanisms
-- Sparse Vector Technique (SVT)
-- Percentile Mechanism
-- Unary and Histogram Encoding
-
-###  Sketching Algorithms
+###  Differential Privacy (DP) Mechanisms
+- Laplace Mechanism
+- Gaussian Mechanism
+- Renyi-Gaussian Mechanism
+- Exponential Mechanism
+- Flip Coin Mechanism
+- Pruning
+- Pruning Adaptive
+- Pruning DP
 - Count Sketch
-- Fast Projection-Based Sketching
 
-###  Adaptive Privacy
+###  Clipping
 - Adaptive Clipping
-- Adaptive Pruning
+- Clipping
+- Clipping DP
 
-###  Utility Functions
-- Convert between Python list, NumPy array, and PyTorch tensor
-- Type casting and validation
-- Compute privacy parameters (e.g., `p`, `q`, `gamma`, `sigma`) from ε
+### Encoding and Pertubation
+- Pertubation
+- Aggregation & Estimation
+- Parameter Utilities
+- Encoding
+
+### Data Conversion Helper
+- Flatten NumPy array to list and get shape
+- Reshape list to NumPy array with shape
+- Flatten PyTorch tensor to list and get shape
+- Reshape list to PyTorch tensor with shape
+- Detect input type and flatten to list with shape
+- Convert list back to original data type and shape
 
 ## Quick Start
 
