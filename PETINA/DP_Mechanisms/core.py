@@ -52,26 +52,60 @@ def applyFlipCoin(probability, domain):
 # Source: Differential Privacy by Cynthia Dwork, International Colloquium on Automata, Languages and Programming (ICALP) 2006, p. 1–12. doi:10.1007/11787006_1
 # -------------------------------
 
-def applyDPGaussian(domain, delta=1e-5, epsilon=1.0, gamma=1.0):
+# def applyDPGaussian(domain, delta=1e-5, epsilon=1.0, gamma=1.0):
+#     """
+#     Applies Gaussian noise to the input data for differential privacy.
+
+#     Parameters:
+#         domain: Input data (list, numpy array, or tensor).
+#         delta (float): Failure probability (default: 1e-5).
+#         epsilon (float): Privacy parameter (default: 1.0).
+#         gamma (float): Scaling factor for noise (default: 1.0).
+
+#     Returns:
+#         Data with added Gaussian noise in the same format as the input.
+#     """
+#     data, shape = type_checking_and_return_lists(domain)
+
+#     sigma = np.sqrt(2 * np.log(1.25 / delta)) * gamma / epsilon
+#     noise = np.random.normal(loc=0, scale=sigma, size=len(data))
+#     privatized = np.array(data) + noise
+
+#     return type_checking_return_actual_dtype(domain, privatized.tolist(), shape)
+
+def applyDPGaussian(domain, delta=1e-5, epsilon=0.1, gamma=1.0, accountant=None):
     """
-    Applies Gaussian noise to the input data for differential privacy.
+    Applies Gaussian noise to the input data for differential privacy,
+    and optionally tracks budget via a BudgetAccountant.
 
     Parameters:
         domain: Input data (list, numpy array, or tensor).
         delta (float): Failure probability (default: 1e-5).
         epsilon (float): Privacy parameter (default: 1.0).
         gamma (float): Scaling factor for noise (default: 1.0).
+        accountant (BudgetAccountant, optional): Tracks spend for (ε, δ).
 
     Returns:
         Data with added Gaussian noise in the same format as the input.
     """
+    # Flatten to list
     data, shape = type_checking_and_return_lists(domain)
 
+    # Compute σ for (ε, δ)-Gaussian mechanism
     sigma = np.sqrt(2 * np.log(1.25 / delta)) * gamma / epsilon
-    noise = np.random.normal(loc=0, scale=sigma, size=len(data))
-    privatized = np.array(data) + noise
 
-    return type_checking_return_actual_dtype(domain, privatized.tolist(), shape)
+    # Add Gaussian noise
+    privatized = np.array(data) + np.random.normal(loc=0, scale=sigma, size=len(data))
+
+    # Budget accounting
+    if accountant is not None:
+        # Spend the exact (ε, δ) for this invocation
+        accountant.spend(epsilon, delta)
+        # (Optional) debug print
+        print(f"Gaussian: spent ε={epsilon}, δ={delta}; remaining={accountant.remaining()}")
+
+    # Restore to original type/shape
+    return type_checking_return_actual_dtype(domain, privatized, shape)
 
 # -------------------------------
 # Source: Ilya Mironov. Renyi differential privacy. In Computer Security Foundations Symposium (CSF), 2017 IEEE 30th, 263–275. IEEE, 2017.
@@ -137,24 +171,66 @@ def applyDPExponential(domain, sensitivity=1.0, epsilon=1.0, gamma=1.0):
 # URL: https://doi.org/10.1007/11681878_14, doi:10.1007/11681878_14.
 # -------------------------------
 
-def applyDPLaplace(domain, sensitivity=1.0, epsilon=1.0, gamma=1.0):
+# def applyDPLaplace(domain, sensitivity=1.0, epsilon=1.0, gamma=1.0):
+#     """
+#     Applies Laplace noise to the input data for differential privacy.
+
+#     Parameters:
+#         domain: Input data (list, numpy array, or tensor).
+#         sensitivity (float): Maximum change by a single individual's data (default: 1.0).
+#         epsilon (float): Privacy parameter (default: 1.0).
+#         gamma (float): Scaling factor for noise (default: 1.0).
+
+#     Returns:
+#         Data with added Laplace noise in the same format as the input.
+#     """
+#     data, shape = type_checking_and_return_lists(domain)
+#     scale = sensitivity * gamma / epsilon
+#     noise = np.random.laplace(loc=0, scale=scale, size=len(data))
+#     privatized = data + noise
+#     return type_checking_return_actual_dtype(domain, privatized, shape)
+def applyDPLaplace(domain, sensitivity=1, epsilon=0.01, gamma=1, accountant=None):
     """
     Applies Laplace noise to the input data for differential privacy.
+    Modified to track budget with a BudgetAccountant.
 
     Parameters:
         domain: Input data (list, numpy array, or tensor).
-        sensitivity (float): Maximum change by a single individual's data (default: 1.0).
-        epsilon (float): Privacy parameter (default: 1.0).
-        gamma (float): Scaling factor for noise (default: 1.0).
+        sensitivity: Maximum change by a single individual's data (default: 1).
+        epsilon: Privacy parameter (default: 1).
+        gamma: Scaling factor for noise (default: 1).
+        accountant (BudgetAccountant, optional): The budget accountant to track spend.
 
     Returns:
         Data with added Laplace noise in the same format as the input.
     """
+    # Use helper functions to convert input data to a flattened list and get its shape
     data, shape = type_checking_and_return_lists(domain)
+    
+    # Calculate the scale for the Laplace distribution.
+    # This maintains the original noise calculation from the PETINA function.
     scale = sensitivity * gamma / epsilon
-    noise = np.random.laplace(loc=0, scale=scale, size=len(data))
-    privatized = data + noise
+    
+    # Add Laplace noise to each element of the flattened data.
+    privatized = np.array(data) + np.random.laplace(loc=0, scale=scale, size=len(data))
+
+    # --- Inject the budget tracking logic here ---
+    if accountant is not None:
+        print("Accountant is present, spending budget for Laplace noise addition.")
+        
+        # The budget cost is based on the `epsilon` parameter provided to the function.
+        # For Laplace noise, the delta cost is 0.
+        cost_epsilon, cost_delta = epsilon, 0.0
+        
+        # The `spend` method will internally check if the budget is exceeded.
+        accountant.spend(cost_epsilon, cost_delta)
+        
+        # Print the total spent budget for debugging and monitoring purposes.
+        print("Total spend: %r" % (accountant.total(),))
+        
+    # Convert the processed flattened list back to the original data type and shape.
     return type_checking_return_actual_dtype(domain, privatized, shape)
+
 
 
 # -------------------------------
