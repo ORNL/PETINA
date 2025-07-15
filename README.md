@@ -29,10 +29,19 @@ PETINA includes state-of-the-art tools for:
 - Clipping
 - Clipping DP
 
-###  Utility Functions
-- Convert between Python list, NumPy array, and PyTorch tensor
-- Type casting and validation
-- Compute privacy parameters (e.g., `p`, `q`, `gamma`, `sigma`) from ε
+### Encoding and Pertubation
+- Pertubation
+- Aggregation & Estimation
+- Parameter Utilities
+- Encoding
+
+### Data Conversion Helper
+- Flatten NumPy array to list and get shape
+- Reshape list to NumPy array with shape
+- Flatten PyTorch tensor to list and get shape
+- Reshape list to PyTorch tensor with shape
+- Detect input type and flatten to list with shape
+- Convert list back to original data type and shape
 
 ## Quick Start
 
