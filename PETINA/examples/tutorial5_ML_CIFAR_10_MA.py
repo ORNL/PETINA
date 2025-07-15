@@ -143,15 +143,15 @@ def train_model_with_budget(dp_type, dp_params, total_epsilon, total_delta, roun
     return model
 
 if __name__ == "__main__":
-    total_epsilon = 0.1
+    total_epsilon = 10
     total_delta = 1
 
     rounds = 2
     epochs_per_round = 3
 
-    # print("\n=== Experiment 1: No DP Noise ===")
-    # train_model_with_budget(dp_type=None, dp_params={}, total_epsilon=total_epsilon, total_delta=total_delta,
-    #                         rounds=rounds, epochs_per_round=epochs_per_round)
+    print("\n=== Experiment 1: No DP Noise ===")
+    train_model_with_budget(dp_type=None, dp_params={}, total_epsilon=total_epsilon, total_delta=total_delta,
+                            rounds=rounds, epochs_per_round=epochs_per_round)
 
     print("\n=== Experiment 2: Gaussian DP Noise with Budget Accounting ===")
     train_model_with_budget(dp_type='gaussian',
