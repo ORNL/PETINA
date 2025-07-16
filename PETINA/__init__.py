@@ -1,5 +1,5 @@
 # PETINA/__init__.py
-from .Data_Conversion_Helper import *
+from .Data_Conversion_Helper import TypeConverter
 from .DP_Mechanisms import *
 from .Encoding_Pertubation import *
 from .Clipping import *
@@ -11,5 +11,7 @@ from .package.IBM_budget_accountant import *
 
 __all__ = [
     # Add module names or main classes/functions you want exposed on import *
-    'CSVec'
+    'CSVec',
+    'TypeConverter'
+
 ]

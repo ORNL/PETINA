@@ -4,7 +4,8 @@ import torch
 import numpy as np
 from scipy import stats as st
 
-from PETINA.Data_Conversion_Helper import type_checking_and_return_lists, type_checking_return_actual_dtype
+# from PETINA.Data_Conversion_Helper import type_checking_and_return_lists, type_checking_return_actual_dtype
+from PETINA.Data_Conversion_Helper import TypeConverter
 
 # -------------------------------
 # Encoding and Perturbation Functions
@@ -234,6 +235,21 @@ def unary_epsilon(p, q):
 # -------------------------------
 # Source: https://livebook.manning.com/book/privacy-preserving-machine-learning/chapter-4/v-4/103
 # -------------------------------
+# def histogramEncoding(value):
+#     """
+#     Histogram encoding with Laplace perturbation.
+
+#     Args:
+#         value: Input data (list, ndarray, or tensor).
+
+#     Returns:
+#         Perturbed counts matching input format.
+#     """
+#     domain, shape = type_checking_and_return_lists(value)
+#     responses = [she_perturbation(encode(r, domain)) for r in domain]
+#     counts = aggregate(responses)
+#     privatized = [count for _, count in zip(domain, counts)]
+#     return type_checking_return_actual_dtype(value, privatized, shape)
 def histogramEncoding(value):
     """
     Histogram encoding with Laplace perturbation.
@@ -244,15 +260,36 @@ def histogramEncoding(value):
     Returns:
         Perturbed counts matching input format.
     """
-    domain, shape = type_checking_and_return_lists(value)
+    # Convert to flat list and capture original type/shape
+    converter = TypeConverter(value)
+    domain, _ = converter.get()
+
+    # Perform histogram encoding and perturbation
     responses = [she_perturbation(encode(r, domain)) for r in domain]
     counts = aggregate(responses)
-    privatized = [count for _, count in zip(domain, counts)]
-    return type_checking_return_actual_dtype(value, privatized, shape)
 
+    # Build privatized list in original order
+    privatized = [count for _, count in zip(domain, counts)]
+
+    # Restore to original type
+    return converter.restore(privatized)
 # -------------------------------
 # Source: https://livebook.manning.com/book/privacy-preserving-machine-learning/chapter-4/v-4/103
 # -------------------------------
+# def histogramEncoding_t(value):
+#     """
+#     An alternative histogram encoding using threshold-based perturbation and aggregation.
+
+#     Parameters:
+#         value: Input data (list, numpy array, or tensor).
+
+#     Returns:
+#         Estimated counts derived from the perturbed responses.
+#     """
+#     domain, shape = type_checking_and_return_lists(value)
+#     perturbed_answers = [the_perturbation(encode(r, domain)) for r in domain]
+#     estimated = the_aggregation_and_estimation(perturbed_answers)
+#     return type_checking_return_actual_dtype(value, estimated, shape)
 def histogramEncoding_t(value):
     """
     An alternative histogram encoding using threshold-based perturbation and aggregation.
@@ -261,19 +298,43 @@ def histogramEncoding_t(value):
         value: Input data (list, numpy array, or tensor).
 
     Returns:
-        Estimated counts derived from the perturbed responses.
+        Estimated counts derived from the perturbed responses, in the same format as the input.
     """
-    domain, shape = type_checking_and_return_lists(value)
+    # Flatten and track type/shape
+    converter = TypeConverter(value)
+    domain, _ = converter.get()
+
+    # Apply threshold-based perturbation and estimation
     perturbed_answers = [the_perturbation(encode(r, domain)) for r in domain]
     estimated = the_aggregation_and_estimation(perturbed_answers)
-    return type_checking_return_actual_dtype(value, estimated, shape)
 
+    # Restore to original input type/shape
+    return converter.restore(estimated)
 
 # -------------------------------
 # Source: Úlfar Erlingsson, Vasyl Pihur, and Aleksandra Korolova. Rappor: randomized aggregatable privacy-preserving ordinal response.
 # In Proceedings of the 2014 ACM SIGSAC Conference on Computer and Communications Security, CCS '14, 1054–1067. New York, NY, USA, 2014.
 # Association for Computing Machinery. URL: https://doi.org/10.1145/2660267.2660348, doi:10.1145/2660267.2660348.
 # -------------------------------
+# def unaryEncoding(value, p=0.75, q=0.25):
+#     """
+#     Applies unary encoding with differential privacy.
+#     Each value is encoded as a one-hot vector, perturbed, and then aggregated.
+
+#     Parameters:
+#         value: Input data (list, numpy array, or tensor).
+#         p (float): Probability of keeping an encoded bit unchanged.
+#         q (float): Probability of flipping an encoded bit to 1 when it is 0.
+
+#     Returns:
+#         A list of tuples pairing each unique value with its privatized count.
+#     """
+#     domain, _ = type_checking_and_return_lists(value)
+#     unique_domain = list(set(domain))
+#     responses = [perturb(encode(r, unique_domain), p, q) for r in domain]
+#     counts = aggregate(responses, p, q)
+#     return list(zip(unique_domain, counts))
+
 def unaryEncoding(value, p=0.75, q=0.25):
     """
     Applies unary encoding with differential privacy.
@@ -287,8 +348,18 @@ def unaryEncoding(value, p=0.75, q=0.25):
     Returns:
         A list of tuples pairing each unique value with its privatized count.
     """
-    domain, _ = type_checking_and_return_lists(value)
+    # Convert input to flat list and store type/shape
+    converter = TypeConverter(value)
+    domain, _ = converter.get()
+
+    # Unique domain for encoding
     unique_domain = list(set(domain))
+
+    # Encode and perturb each entry
     responses = [perturb(encode(r, unique_domain), p, q) for r in domain]
+
+    # Aggregate perturbed responses
     counts = aggregate(responses, p, q)
+
+    # Return list of (value, privatized_count) pairs
     return list(zip(unique_domain, counts))
