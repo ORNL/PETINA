@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
     print("\n=== Experiment 2: Gaussian DP Noise with Budget Accounting ===")
     train_model_with_budget(dp_type='gaussian',
-                            dp_params={'delta': 1e-5, 'epsilon': 0.0005, 'gamma': 0.01},
+                            dp_params={'delta': 1e-5, 'epsilon': 1.0, 'gamma': 0.01},
                             total_epsilon=total_epsilon, total_delta=total_delta,
                             rounds=rounds, epochs_per_round=epochs_per_round)
 

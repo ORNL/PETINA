@@ -102,7 +102,7 @@ def applyDPGaussian(domain, delta=1e-5, epsilon=0.1, gamma=1.0, accountant=None)
         # Spend the exact (ε, δ) for this invocation
         accountant.spend(epsilon, delta)
         # (Optional) debug print
-        print(f"Gaussian: spent ε={epsilon}, δ={delta}; remaining={accountant.remaining()}")
+        # print(f"Gaussian: spent ε={epsilon}, δ={delta}; remaining={accountant.remaining()}")
 
     # Restore to original type/shape
     return type_checking_return_actual_dtype(domain, privatized, shape)
@@ -216,7 +216,7 @@ def applyDPLaplace(domain, sensitivity=1, epsilon=0.01, gamma=1, accountant=None
 
     # --- Inject the budget tracking logic here ---
     if accountant is not None:
-        print("Accountant is present, spending budget for Laplace noise addition.")
+        # print("Accountant is present, spending budget for Laplace noise addition.")
         
         # The budget cost is based on the `epsilon` parameter provided to the function.
         # For Laplace noise, the delta cost is 0.
@@ -226,7 +226,7 @@ def applyDPLaplace(domain, sensitivity=1, epsilon=0.01, gamma=1, accountant=None
         accountant.spend(cost_epsilon, cost_delta)
         
         # Print the total spent budget for debugging and monitoring purposes.
-        print("Total spend: %r" % (accountant.total(),))
+        # print("Total spend: %r" % (accountant.total(),))
         
     # Convert the processed flattened list back to the original data type and shape.
     return type_checking_return_actual_dtype(domain, privatized, shape)
