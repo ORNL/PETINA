@@ -8,7 +8,13 @@
 [![Downloads](https://static.pepy.tech/badge/petina)](https://pepy.tech/project/petina)
 
 **PETINA** is a general-purpose Python library for Differential Privacy (DP), designed for flexibility, modularity, and extensibility across a wide range of ML and data processing pipelines. It supports both numerical and categorical data, with tools for supervised and unsupervised tasks.
-
+## TODO:
+- [ ] Gaussian in PETINA has gamma which is sensitive in smart noise 
+- [ ] Dynamic sketching
+- [ ] Add 3 MA from Opals
+- [ ] Also in the dynamic sketching there is example for gaussian but more important there is something called noise_multiplicator have that in the code
+- [ ] Opacus also has the noise mutiplicator. Ah another thing we should have an example that compares PETINA and Opacus. So, same input values and compare the results.
+- [ ] Noise multiplier will need to get the epsilon value 
 ##  Features
 
 PETINA includes state-of-the-art tools for:
