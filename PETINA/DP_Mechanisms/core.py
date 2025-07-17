@@ -613,42 +613,102 @@ def applyPruningDP(domain, prune_ratio, sensitivity, epsilon):
 #     # Convert the processed list back to the original data type.
 #     return type_checking_return_actual_dtype(domain, privatized, shape)
 
-def applyCountSketch(domain, num_rows, num_cols):
+# def applyCountSketch(domain, num_rows, num_cols):
+#     """
+#     Applies the Count Sketch mechanism to the input data.
+#     The input vector is sketched and then un-sketched to demonstrate
+#     the approximation capability of the data structure.
+
+#     Parameters:
+#         domain: Input data (list, numpy array, or tensor).
+#         num_rows (int): Number of rows in the sketch matrix.
+#         num_cols (int): Number of columns (buckets) in the sketch matrix.
+
+#     Returns:
+#         The reconstructed data after sketching, in the same format as the input.
+#     """
+#     # Flatten input and track original type/shape
+#     converter = TypeConverter(domain)
+#     items, shape = converter.get()
+
+#     dimension = len(items)
+
+#     # Create Count Sketch vector
+#     cs_vec = CSVec(d=dimension, c=num_cols, r=num_rows)
+
+#     # Accumulate the vector into the sketch (torch tensor float32)
+#     cs_vec.accumulateVec(torch.tensor(items, dtype=torch.float32))
+
+#     # Un-sketch to reconstruct approximation (tensor)
+#     unsketched_tensor = cs_vec.unSketch(k=dimension)
+
+#     # Convert tensor to list
+#     privatized = unsketched_tensor.tolist()
+
+#     # Debug prints (optional, remove if noisy)
+#     print("domain:", domain)
+#     print("privatized:", privatized)
+#     print("shape:", shape)
+
+#     # Restore to original type/shape
+#     return converter.restore(privatized)
+def applyCountSketch(domain, sketch_rows, sketch_cols, dp_mechanism, dp_params, num_blocks=1, device=None):
     """
-    Applies the Count Sketch mechanism to the input data.
-    The input vector is sketched and then un-sketched to demonstrate
-    the approximation capability of the data structure.
+    Applies Count Sketch to the input domain, then adds differential privacy
+    noise to the sketched representation, and finally reconstructs the data.
 
     Parameters:
-        domain: Input data (list, numpy array, or tensor).
-        num_rows (int): Number of rows in the sketch matrix.
-        num_cols (int): Number of columns (buckets) in the sketch matrix.
+        domain: Input data (list, numpy array, or torch.Tensor).
+        sketch_rows (int): Number of rows (r) for the Count Sketch.
+        sketch_cols (int): Number of columns (c) for the Count Sketch.
+        dp_mechanism (callable): The differential privacy noise function to apply
+                                 (e.g., DP_Mechanisms.applyDPGaussian,
+                                 DP_Mechanisms.applyDPLaplace).
+                                 This function should expect a numpy array and return a numpy array.
+        dp_params (dict): A dictionary of parameters required by the dp_mechanism.
+        num_blocks (int, optional): Number of blocks for CSVec's memory optimization. Default is 1.
+        device (torch.device or str, optional): The device to perform operations on.
+                                                Defaults to 'cuda' if available, else 'cpu'.
 
     Returns:
-        The reconstructed data after sketching, in the same format as the input.
+        The differentially private, sketched, and reconstructed data in the
+        original format of the input domain.
     """
-    # Flatten input and track original type/shape
+    # Use TypeConverter to handle various input types and flatten the domain
     converter = TypeConverter(domain)
-    items, shape = converter.get()
+    flattened_data, original_shape = converter.get()
 
-    dimension = len(items)
+    # Ensure flattened_data is a PyTorch tensor on the correct device for CSVec
+    if not isinstance(flattened_data, torch.Tensor):
+        flattened_data = torch.tensor(flattened_data, dtype=torch.float32)
+    
+    if device is None:
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    flattened_data = flattened_data.to(device)
 
-    # Create Count Sketch vector
-    cs_vec = CSVec(d=dimension, c=num_cols, r=num_rows)
+    # Initialize CSVec
+    # d: original_dim, c: columns, r: rows
+    csvec_instance = CSVec(
+        d=flattened_data.numel(),
+        c=sketch_cols,
+        r=sketch_rows,
+        numBlocks=num_blocks,
+        device=device
+    )
 
-    # Accumulate the vector into the sketch (torch tensor float32)
-    cs_vec.accumulateVec(torch.tensor(items, dtype=torch.float32))
+    # Accumulate the flattened data into the Count Sketch
+    csvec_instance.accumulateVec(flattened_data)
 
-    # Un-sketch to reconstruct approximation (tensor)
-    unsketched_tensor = cs_vec.unSketch(k=dimension)
+    # Apply DP noise to the internal table of the CSVec
+    # The table is a (r, c) tensor. We need to detach, move to CPU, convert to numpy,
+    # apply noise, convert back to tensor, and move back to device.
+    sketched_table_np = csvec_instance.table.detach().cpu().numpy()
+    noisy_sketched_table_np = dp_mechanism(sketched_table_np, **dp_params)
+    csvec_instance.table = torch.tensor(noisy_sketched_table_np, dtype=torch.float32).to(device)
 
-    # Convert tensor to list
-    privatized = unsketched_tensor.tolist()
+    # Reconstruct the data from the noisy sketch
+    reconstructed_noisy_data = csvec_instance._findAllValues()
 
-    # Debug prints (optional, remove if noisy)
-    print("domain:", domain)
-    print("privatized:", privatized)
-    print("shape:", shape)
-
-    # Restore to original type/shape
-    return converter.restore(privatized)
+    # Restore the reconstructed data to the original input type and shape
+    # _findAllValues returns a 1D tensor, so convert to list for TypeConverter
+    return converter.restore(reconstructed_noisy_data.tolist())

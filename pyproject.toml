@@ -26,7 +26,9 @@ classifiers = [
 dependencies = [
   "torch",
   "numpy",
-  "scipy"
+  "scipy",
+  "scikit-learn",
+  "tqdm"
 ]
 [project.urls]
 Homepage = "https://github.com/ORNL/PETINA"
