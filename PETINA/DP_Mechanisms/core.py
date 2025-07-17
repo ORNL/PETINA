@@ -164,7 +164,7 @@ def applyDPGaussian(domain, delta=1e-5, epsilon=0.1, gamma=1.0, accountant=None)
     sigma = np.sqrt(2 * np.log(1.25 / delta)) * gamma / epsilon
 
     # Add Gaussian noise
-    privatized = np.array(flat_list) + np.random.normal(loc=0, scale=sigma, size=len(flat_list))
+    privatized = np.array(flat_list) + np.random.normal(loc=0, scale=sigma, size=len(flat_list))*1.572
 
     # Budget accounting
     if accountant is not None:
@@ -219,7 +219,7 @@ def applyRDPGaussian(domain, sensitivity=1.0, alpha=10.0, epsilon_bar=1.0):
     sigma = np.sqrt((sensitivity ** 2 * alpha) / (2 * epsilon_bar))
 
     # Generate Gaussian noise
-    noise = np.random.normal(loc=0, scale=sigma, size=len(data))
+    noise = np.random.normal(loc=0, scale=sigma, size=len(data)) 
 
     # Add noise to data
     privatized = np.array(data) + noise
@@ -231,31 +231,31 @@ def applyRDPGaussian(domain, sensitivity=1.0, alpha=10.0, epsilon_bar=1.0):
 # Source: Mark Bun and Thomas Steinke. Concentrated differential privacy: simplifications, extensions, and lower bounds. In Theory of Cryptography Conference, 635–658. Springer, 2016.
 # -------------------------------
 
-def applyDPExponential(domain, sensitivity=1.0, epsilon=1.0, gamma=1.0):
-    """
-    Applies exponential noise to the input data for differential privacy.
+# def applyDPExponential(domain, sensitivity=1.0, epsilon=1.0, gamma=1.0):
+#     """
+#     Applies exponential noise to the input data for differential privacy.
 
-    Parameters:
-        domain: Input data (list, numpy array, or tensor).
-        sensitivity (float): Maximum change by a single individual's data (default: 1.0).
-        epsilon (float): Privacy parameter (default: 1.0).
-        gamma (float): Scaling factor for noise (default: 1.0).
+#     Parameters:
+#         domain: Input data (list, numpy array, or tensor).
+#         sensitivity (float): Maximum change by a single individual's data (default: 1.0).
+#         epsilon (float): Privacy parameter (default: 1.0).
+#         gamma (float): Scaling factor for noise (default: 1.0).
 
-    Returns:
-        Data with added exponential noise in the same format as the input.
-    """
-    data, shape = type_checking_and_return_lists(domain)
+#     Returns:
+#         Data with added exponential noise in the same format as the input.
+#     """
+#     data, shape = type_checking_and_return_lists(domain)
 
-    scale = sensitivity * gamma / epsilon
+#     scale = sensitivity * gamma / epsilon
 
-    # Generate symmetric exponential noise by sampling exponential and randomly flipping signs
-    noise = np.random.exponential(scale=scale, size=len(data))
-    signs = np.random.choice([-1, 1], size=len(data))
-    noise *= signs
+#     # Generate symmetric exponential noise by sampling exponential and randomly flipping signs
+#     noise = np.random.exponential(scale=scale, size=len(data))
+#     signs = np.random.choice([-1, 1], size=len(data))
+#     noise *= signs
 
-    privatized = np.array(data) + noise
+#     privatized = np.array(data) + noise
 
-    return type_checking_return_actual_dtype(domain, privatized.tolist(), shape)
+#     return type_checking_return_actual_dtype(domain, privatized.tolist(), shape)
 
 def applyDPExponential(domain, sensitivity=1.0, epsilon=1.0, gamma=1.0):
     """
