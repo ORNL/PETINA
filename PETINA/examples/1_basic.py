@@ -12,9 +12,9 @@ print("Domain:", domain)
 
 # --- Set DP parameters ---
 sensitivity = 1
-epsilon = 0.1
-delta = 1e-4
-gamma = 0.001
+epsilon = 0.001
+delta = 1e-5
+gamma = 1e-5
 
 # --- Differential Privacy Mechanisms ---
 print("\n=== Flip Coin Mechanism ===")

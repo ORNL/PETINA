@@ -266,19 +266,11 @@ class BudgetAccountant:
         if slack == 0:
             return Budget(total_epsilon_naive, total_delta)
 
-        # Advanced composition from Kairouz et al. (2017)
-        total_epsilon_kov = epsilon_exp_sum + np.sqrt(2 * epsilon_sq_sum * np.log(np.exp(1) + np.sqrt(epsilon_sq_sum) / slack))
-        
-        # Original advanced composition theorem (approximate, often tighter for larger delta)
-        # Ref: Dwork, Roth. The Algorithmic Foundations of Differential Privacy.
-        # This one is usually written as (epsilon', delta + delta') where epsilon' = epsilon * sqrt(k * log(1/delta')) + k * epsilon * (exp(epsilon)-1)
-        # For simplicity, we are aligning with the three composition bounds in the IBM code.
-        # The DRV (Dwork, Roth, Vadhan) bound often used for (epsilon, delta)-DP for k compositions:
-        # epsilon' = sqrt(2*k*log(1/delta'))*epsilon + k*epsilon*(exp(epsilon)-1)
-        # This is not directly used in the IBM code for the epsilon sum, but implied by epsilon_exp_sum.
-        # The IBM code here uses the Kairouz et al. (KOV17) paper's tighter bounds for RDP -> (epsilon, delta)-DP.
+        total_epsilon_drv = epsilon_exp_sum + np.sqrt(2 * epsilon_sq_sum * np.log(1 / slack))
+        total_epsilon_kov = epsilon_exp_sum + np.sqrt(2 * epsilon_sq_sum *
+                                                      np.log(np.exp(1) + np.sqrt(epsilon_sq_sum) / slack))
 
-        return Budget(min(total_epsilon_naive, total_epsilon_kov), total_delta)
+        return Budget(min(total_epsilon_naive, total_epsilon_drv, total_epsilon_kov), total_delta)
 
     def check(self, epsilon, delta):
         """Checks if the provided (epsilon,delta) can be spent without exceeding the accountant's budget ceiling.

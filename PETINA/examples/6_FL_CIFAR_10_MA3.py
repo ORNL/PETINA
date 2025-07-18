@@ -26,7 +26,7 @@ class DP_Mechanisms:
         This function expects and returns a NumPy array.
         """
         sigma = np.sqrt(2 * np.log(1.25 / delta)) * gamma / epsilon
-        privatized = domain + np.random.normal(loc=0, scale=sigma, size=domain.shape) * 1.572 # Retaining *1.572 from your original code
+        privatized = domain + np.random.normal(loc=0, scale=sigma, size=domain.shape)  # Retaining *1.572 from your original code
         
         if accountant is not None:
             accountant.spend(epsilon, delta)
@@ -428,15 +428,23 @@ class FederatedServer:
 if __name__ == "__main__":
     total_epsilon = 11000
     total_delta = 1-1e-9 
-    global_rounds = 2 # Number of communication rounds between server and clients
-    epochs_per_round_client = 3 # Number of local epochs each client runs per global round
+    global_rounds = 4 # Number of communication rounds between server and clients
+    epochs_per_round_client = 10 # Number of local epochs each client runs per global round
     num_federated_clients = 4
-
     delta = 1e-5
-    epsilon = 1.1011632828830176
-    gamma = 0.01
+    epsilon = 0.001
+    gamma = 1e-5
     sensitivity = 1.0
 
+    # total_epsilon = 3000
+    # # Avoid using delta=1.0, as it causes remaining().delta to always be 1.0. (IBM Budget Accountant issue)
+    # total_delta = 1-1e-9 # Set a delta close to 1 but not exactly 1 to avoid issues with remaining budget checks
+    # rounds = 4
+    # epochs_per_round = 10
+    # delta=1e-5
+    # epsilon= 0.001
+    # gamma=1e-5
+    # sensitivity = 1.0
     print("===========Parameters for Federated DP Training===========")
     print(f"Running experiments with ε={epsilon}, δ={delta}, γ={gamma}, sensitivity={sensitivity}")
     print(f"Total global rounds: {global_rounds}, local epochs per client: {epochs_per_round_client}")
@@ -445,18 +453,18 @@ if __name__ == "__main__":
     print(f"Batch size: {batch_size}\n")
 
     # --- Experiment 1: No DP Noise ---
-    # print("\n=== Experiment 1: Federated Learning - No DP Noise ===")
-    # server_no_dp = FederatedServer(
-    #     num_clients=num_federated_clients,
-    #     total_epsilon=float('inf'), # Infinite budget for no DP
-    #     total_delta=1.0, # Delta is typically 1.0 for no DP
-    #     device=device,
-    #     dp_type=None,
-    #     dp_params={},
-    #     use_count_sketch=False,
-    #     sketch_params=None,
-    #     testloader=testloader
-    # )
+    print("\n=== Experiment 1: Federated Learning - No DP Noise ===")
+    server_no_dp = FederatedServer(
+        num_clients=num_federated_clients,
+        total_epsilon=float('inf'), # Infinite budget for no DP
+        total_delta=1.0, # Delta is typically 1.0 for no DP
+        device=device,
+        dp_type=None,
+        dp_params={},
+        use_count_sketch=False,
+        sketch_params=None,
+        testloader=testloader
+    )
     # server_no_dp.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
     # trained_global_model_no_dp = server_no_dp.train_federated(global_rounds=global_rounds)
 
@@ -477,20 +485,20 @@ if __name__ == "__main__":
     # trained_global_model_gaussian_dp = server_gaussian_dp.train_federated(global_rounds=global_rounds)
 
     # # --- Experiment 3: Laplace DP Noise with Budget Accounting ---
-    # print("\n=== Experiment 3: Federated Learning - Laplace DP Noise with Budget Accounting ===")
-    # server_laplace_dp = FederatedServer(
-    #     num_clients=num_federated_clients,
-    #     total_epsilon=total_epsilon,
-    #     total_delta=0.0, # Delta is typically 0 for pure Laplace
-    #     device=device,
-    #     dp_type='laplace',
-    #     dp_params={'sensitivity': sensitivity, 'epsilon': epsilon, 'gamma': gamma},
-    #     use_count_sketch=False,
-    #     sketch_params=None,
-    #     testloader=testloader
-    # )
-    # server_laplace_dp.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
-    # trained_global_model_laplace_dp = server_laplace_dp.train_federated(global_rounds=global_rounds)
+    print("\n=== Experiment 3: Federated Learning - Laplace DP Noise with Budget Accounting ===")
+    server_laplace_dp = FederatedServer(
+        num_clients=num_federated_clients,
+        total_epsilon=total_epsilon,
+        total_delta=0.0, # Delta is typically 0 for pure Laplace
+        device=device,
+        dp_type='laplace',
+        dp_params={'sensitivity': sensitivity, 'epsilon': epsilon, 'gamma': gamma},
+        use_count_sketch=False,
+        sketch_params=None,
+        testloader=testloader
+    )
+    server_laplace_dp.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
+    trained_global_model_laplace_dp = server_laplace_dp.train_federated(global_rounds=global_rounds)
 
     # --- Experiment 4: CSVec + Gaussian DP with Budget Accounting ---
     sketch_rows = 5
@@ -512,20 +520,20 @@ if __name__ == "__main__":
     # trained_global_model_cs_gaussian = server_cs_gaussian.train_federated(global_rounds=global_rounds)
 
     # --- Experiment 5: CSVec + Laplace DP with Budget Accounting ---
-    print(f"\n=== Experiment 5: Federated Learning - CSVec + Laplace DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
-    server_cs_laplace = FederatedServer(
-        num_clients=num_federated_clients,
-        total_epsilon=total_epsilon,
-        total_delta=0.0, # Delta is typically 0 for pure Laplace
-        device=device,
-        dp_type='laplace',
-        dp_params={'delta': delta,'sensitivity': sensitivity, 'epsilon': epsilon, 'gamma': gamma},
-        use_count_sketch=True,
-        sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks},
-        testloader=testloader
-    )
-    server_cs_laplace.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
-    trained_global_model_cs_laplace = server_cs_laplace.train_federated(global_rounds=global_rounds)
+    # print(f"\n=== Experiment 5: Federated Learning - CSVec + Laplace DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
+    # server_cs_laplace = FederatedServer(
+    #     num_clients=num_federated_clients,
+    #     total_epsilon=total_epsilon,
+    #     total_delta=0.0, # Delta is typically 0 for pure Laplace
+    #     device=device,
+    #     dp_type='laplace',
+    #     dp_params={'delta': delta,'sensitivity': sensitivity, 'epsilon': epsilon, 'gamma': gamma},
+    #     use_count_sketch=True,
+    #     sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks},
+    #     testloader=testloader
+    # )
+    # server_cs_laplace.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
+    # trained_global_model_cs_laplace = server_cs_laplace.train_federated(global_rounds=global_rounds)
 
 # -------------OUTPUT-----------------
 # Using device: cuda

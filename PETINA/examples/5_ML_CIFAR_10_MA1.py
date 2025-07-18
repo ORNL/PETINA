@@ -141,7 +141,7 @@ transform = transforms.Compose([
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 testset  = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
 
-batch_size = 1024
+batch_size = 1024 
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True)
 testloader  = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True)
 
@@ -303,14 +303,14 @@ def train_model_with_budget(dp_type, dp_params, total_epsilon, total_delta, roun
     return model
 
 if __name__ == "__main__":
-    total_epsilon = 11000
+    total_epsilon = 3000
     # Avoid using delta=1.0, as it causes remaining().delta to always be 1.0. (IBM Budget Accountant issue)
     total_delta = 1-1e-9 # Set a delta close to 1 but not exactly 1 to avoid issues with remaining budget checks
-    rounds = 2
-    epochs_per_round = 3
-    delta=1e-5
-    epsilon=1.1011632828830176
-    gamma=0.01
+    rounds = 10
+    epochs_per_round = 10
+    delta=1e-4
+    epsilon= 1
+    gamma=1e-5
     sensitivity = 1.0
     print("===========Parameters for DP Training===========")
     print(f"Running experiments with ε={epsilon}, δ={delta}, γ={gamma}, sensitivity={sensitivity}")
@@ -319,11 +319,11 @@ if __name__ == "__main__":
     print(f"Batch size: {batch_size}\n")
 
 
-    # print("\n=== Experiment 1: No DP Noise ===")
-    # start = time.time()
-    # train_model_with_budget(dp_type=None, dp_params={}, total_epsilon=total_epsilon, total_delta=total_delta,
-    #                         rounds=rounds, epochs_per_round=epochs_per_round)
-    # print(f"Time run: {time.time() - start:.2f} seconds\n")
+    print("\n=== Experiment 1: No DP Noise ===")
+    start = time.time()
+    train_model_with_budget(dp_type=None, dp_params={}, total_epsilon=total_epsilon, total_delta=total_delta,
+                            rounds=rounds, epochs_per_round=epochs_per_round)
+    print(f"Time run: {time.time() - start:.2f} seconds\n")
 
     # print("\n=== Experiment 2: Gaussian DP Noise with Budget Accounting ===")
     # start = time.time()
@@ -340,30 +340,41 @@ if __name__ == "__main__":
     #                         total_epsilon=total_epsilon, total_delta=0.0, # Delta is typically 0 for pure Laplace
     #                         rounds=rounds, epochs_per_round=epochs_per_round)
     # print(f"Time run: {time.time() - start:.2f} seconds\n")
-    # Count Sketch parameters
-    sketch_rows = 5
-    sketch_cols = 10000
-    csvec_blocks = 1
+    # # Count Sketch parameters
+    # sketch_rows = 5
+    # sketch_cols = 10000
+    # csvec_blocks = 1
     
-    print(f"\n=== Experiment 4: CSVec + Gaussian DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
-    start = time.time()
-    train_model_with_budget(dp_type='gaussian',
-                            dp_params={'delta': delta, 'epsilon': epsilon, 'gamma': gamma, 'sensitivity': sensitivity}, # Pass sensitivity for CSVec context
-                            total_epsilon=total_epsilon, total_delta=total_delta,
-                            rounds=rounds, epochs_per_round=epochs_per_round,
-                            use_count_sketch=True,
-                            sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks})
-    print(f"Time run: {time.time() - start:.2f} seconds\n")
+    # print(f"\n=== Experiment 4: CSVec + Gaussian DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
+    # start = time.time()
+    # train_model_with_budget(dp_type='gaussian',
+    #                         dp_params={'delta': delta, 'epsilon': epsilon, 'gamma': gamma, 'sensitivity': sensitivity}, # Pass sensitivity for CSVec context
+    #                         total_epsilon=total_epsilon, total_delta=total_delta,
+    #                         rounds=rounds, epochs_per_round=epochs_per_round,
+    #                         use_count_sketch=True,
+    #                         sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks})
+    # print(f"Time run: {time.time() - start:.2f} seconds\n")
     
-    print(f"\n=== Experiment 5: CSVec + Laplace DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
-    start = time.time()
-    train_model_with_budget(dp_type='laplace',
-                            dp_params={'delta': delta,'sensitivity': sensitivity, 'epsilon': epsilon, 'gamma': gamma},
-                            total_epsilon=total_epsilon, total_delta=0.0, # Delta is typically 0 for pure Laplace
-                            rounds=rounds, epochs_per_round=epochs_per_round,
-                            use_count_sketch=True,
-                            sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks})
-    print(f"Time run: {time.time() - start:.2f} seconds\n")
+    # print(f"\n=== Experiment 5: CSVec + Laplace DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
+    # start = time.time()
+    # train_model_with_budget(dp_type='laplace',
+    #                         dp_params={'delta': delta,'sensitivity': sensitivity, 'epsilon': epsilon, 'gamma': gamma},
+    #                         total_epsilon=total_epsilon, total_delta=0.0, # Delta is typically 0 for pure Laplace
+    #                         rounds=rounds, epochs_per_round=epochs_per_round,
+    #                         use_count_sketch=True,
+    #                         sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks})
+    # print(f"Time run: {time.time() - start:.2f} seconds\n")
+
+
+
+
+
+
+
+
+
+
+
 # ----------------OUTPUT-------------------
 # Using device: cuda
 # Device name: NVIDIA GeForce RTX 3060 Ti

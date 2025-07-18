@@ -161,10 +161,10 @@ def applyDPGaussian(domain, delta=1e-5, epsilon=0.1, gamma=1.0, accountant=None)
     flat_list, _ = converter.get()
 
     # Compute σ for (ε, δ)-Gaussian mechanism
-    sigma = np.sqrt(2 * np.log(1.25 / delta)) * gamma / epsilon
-
+    # sigma = np.sqrt(2 * np.log(1.25 / delta)) * gamma / epsilon
+    
     # Add Gaussian noise
-    privatized = np.array(flat_list) + np.random.normal(loc=0, scale=sigma, size=len(flat_list))*1.572
+    privatized = np.array(flat_list) + np.random.normal(loc=0, scale=sigma, size=len(flat_list))
 
     # Budget accounting
     if accountant is not None:
