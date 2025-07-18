@@ -324,8 +324,8 @@ if __name__ == "__main__":
     total_epsilon = 3000
     # Avoid using delta=1.0, as it causes remaining().delta to always be 1.0. (IBM Budget Accountant issue)
     total_delta = 1-1e-9 # Set a delta close to 1 but not exactly 1 to avoid issues with remaining budget checks
-    rounds = 10
-    epochs_per_round = 10
+    rounds = 50
+    epochs_per_round = 4
     delta=1e-5
     epsilon= 0.001
     gamma=1e-5

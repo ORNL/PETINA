@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
+import torchvision.models as models
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from tqdm import tqdm
@@ -146,6 +147,19 @@ batch_size = 1024
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True)
 testloader  = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True)
 
+
+class ResNet18CIFAR10(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.model = models.resnet18(pretrained=False)
+        self.model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.model.maxpool = nn.Identity()  # Remove maxpool for CIFAR
+        self.model.fc = nn.Linear(512, 10)  # CIFAR-10 has 10 classes
+
+    def forward(self, x):
+        return self.model(x)
+
+
 # --- Simple CNN Model ---
 class SimpleCNN(nn.Module):
     # def __init__(self):
@@ -210,7 +224,7 @@ def apply_gaussian_with_budget(grad: torch.Tensor, delta: float, epsilon: float,
 
 # --- Training with DP and budget accounting + mixed precision ---
 def train_model_with_budget(dp_type, dp_params, total_epsilon, total_delta, rounds=2, epochs_per_round=3, use_count_sketch=False, sketch_params=None):
-    model = SimpleCNN().to(device)
+    model = ResNet18CIFAR10().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
@@ -240,7 +254,22 @@ def train_model_with_budget(dp_type, dp_params, total_epsilon, total_delta, roun
 
                     if dp_type is not None:
                         scaler.unscale_(optimizer) 
-                        
+                        max_grad_norm = 1.0  # or a hyperparameter you can tune
+
+                        # Compute total gradient norm
+                        total_norm = 0.0
+                        for p in model.parameters():
+                            if p.grad is not None:
+                                param_norm = p.grad.data.norm(2)
+                                total_norm += param_norm.item() ** 2
+                        total_norm = total_norm ** 0.5
+
+                        # Clip gradients if norm exceeds max_grad_norm
+                        clip_coef = max_grad_norm / (total_norm + 1e-6)
+                        if clip_coef < 1:
+                            for p in model.parameters():
+                                if p.grad is not None:
+                                    p.grad.data.mul_(clip_coef)
                         if use_count_sketch:
                             grad_list = [p.grad.view(-1) for p in model.parameters() if p.grad is not None]
                             if not grad_list: continue
@@ -324,8 +353,8 @@ if __name__ == "__main__":
     total_epsilon = 3000
     # Avoid using delta=1.0, as it causes remaining().delta to always be 1.0. (IBM Budget Accountant issue)
     total_delta = 1-1e-9 # Set a delta close to 1 but not exactly 1 to avoid issues with remaining budget checks
-    rounds = 10
-    epochs_per_round = 10
+    rounds = 50
+    epochs_per_round = 4
     delta=1e-4
     epsilon= 1
     gamma=1e-5
