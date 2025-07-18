@@ -143,7 +143,7 @@ transform = transforms.Compose([
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 testset  = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
 
-batch_size = 1024 
+batch_size = 128 
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True)
 testloader  = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True)
 
@@ -224,7 +224,7 @@ def apply_gaussian_with_budget(grad: torch.Tensor, delta: float, epsilon: float,
 
 # --- Training with DP and budget accounting + mixed precision ---
 def train_model_with_budget(dp_type, dp_params, total_epsilon, total_delta, rounds=2, epochs_per_round=3, use_count_sketch=False, sketch_params=None):
-    model = ResNet18CIFAR10().to(device)
+    model = SimpleCNN().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
