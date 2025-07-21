@@ -18,7 +18,7 @@ from PETINA import BudgetAccountant, BudgetError
 
 class DP_Mechanisms:
     @staticmethod
-    def applyDPGaussian(domain: np.ndarray, delta: float = 1e-5, epsilon: float = 0.1, gamma: float = 1.0, accountant: BudgetAccountant | None = None) -> np.ndarray:
+    def applyDPGaussian(domain: np.ndarray, delta: float = 1e-5, epsilon: float = 0.1, gamma: float = 1.0) -> np.ndarray:
         """
         Applies Gaussian noise to the input NumPy array for differential privacy,
         and optionally tracks budget via a BudgetAccountant.
@@ -27,12 +27,12 @@ class DP_Mechanisms:
         sigma = np.sqrt(2 * np.log(1.25 / delta)) * gamma / epsilon
         privatized = domain + np.random.normal(loc=0, scale=sigma, size=domain.shape) * 1.572 # Retaining *1.572 from your original code
         
-        if accountant is not None:
-            accountant.spend(epsilon, delta)
+        # if accountant is not None:
+        #     accountant.spend(epsilon, delta)
         return privatized
 
     @staticmethod
-    def applyDPLaplace(domain: np.ndarray, sensitivity: float = 1, epsilon: float = 0.01, gamma: float = 1, accountant: BudgetAccountant | None = None) -> np.ndarray:
+    def applyDPLaplace(domain: np.ndarray, sensitivity: float = 1, epsilon: float = 0.01, gamma: float = 1) -> np.ndarray:
         """
         Applies Laplace noise to the input NumPy array for differential privacy.
         Tracks privacy budget with an optional BudgetAccountant.
@@ -43,9 +43,9 @@ class DP_Mechanisms:
         scale = sensitivity * gamma / epsilon
         privatized = domain + np.random.laplace(loc=0, scale=scale, size=domain.shape)
 
-        if accountant is not None:
-            cost_epsilon, cost_delta = epsilon, 0.0 # Laplace mechanism typically has delta=0
-            accountant.spend(cost_epsilon, cost_delta)
+        # if accountant is not None:
+        #     cost_epsilon, cost_delta = epsilon, 0.0 # Laplace mechanism typically has delta=0
+        #     accountant.spend(cost_epsilon, cost_delta)
             
         return privatized
 
@@ -60,8 +60,7 @@ class DP_Mechanisms:
         sensitivity: float = 1.0,
         gamma: float = 0.01,
         num_blocks: int = 1,
-        device: torch.device | str | None = None,
-        accountant: BudgetAccountant | None = None
+        device: torch.device | str | None = None
     ) -> list | np.ndarray | torch.Tensor:
         """
         Applies Count Sketch to the input data, then adds differential privacy
@@ -95,11 +94,11 @@ class DP_Mechanisms:
 
         if mechanism == "gaussian":
             noisy_sketched_table_np = DP_Mechanisms.applyDPGaussian(
-                sketched_table_np, delta=delta, epsilon=epsilon, gamma=gamma, accountant=accountant
+                sketched_table_np, delta=delta, epsilon=epsilon, gamma=gamma
             )
         elif mechanism == "laplace":
             noisy_sketched_table_np = DP_Mechanisms.applyDPLaplace(
-                sketched_table_np, sensitivity=sensitivity, epsilon=epsilon, gamma=gamma, accountant=accountant
+                sketched_table_np, sensitivity=sensitivity, epsilon=epsilon, gamma=gamma
             )
         else:
             raise ValueError(f"Unsupported DP mechanism for Count Sketch: {mechanism}. Choose 'gaussian' or 'laplace'.")
@@ -134,17 +133,31 @@ if device.type == 'cuda':
     print(f"Device name: {torch.cuda.get_device_name(0)}")
 
 # --- Load CIFAR-10 dataset ---
-transform = transforms.Compose([
+# transform = transforms.Compose([
+#     transforms.ToTensor(),
+#     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+# ])
+
+# trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+# testset  = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
+
+# batch_size = 1024 
+# trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True)
+# testloader  = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True)
+
+# --- Load MNIST dataset ---
+transform_mnist = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    transforms.Normalize((0.1307,), (0.3081,)) # Standard MNIST normalization
 ])
 
-trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-testset  = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
+trainset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform_mnist)
+testset  = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transform_mnist)
 
-batch_size = 1024 
+batch_size = 240 # Or whatever you want
+testbatchsize=1024
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True)
-testloader  = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True)
+testloader  = torch.utils.data.DataLoader(testset, batch_size=testbatchsize, shuffle=False, num_workers=2, pin_memory=True)
 
 # --- Simple CNN Model ---
 class SimpleCNN(nn.Module):
@@ -166,7 +179,7 @@ class SimpleCNN(nn.Module):
     #     return x
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.conv1 = nn.Conv2d(1, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
         self.fc1 = nn.Linear(16 * 5 * 5, 120)
@@ -181,7 +194,64 @@ class SimpleCNN(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+class SampleConvNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 16, 8, 2, padding=3)
+        self.conv2 = nn.Conv2d(16, 32, 4, 2)
+        self.fc1 = nn.Linear(32 * 4 * 4, 32)
+        self.fc2 = nn.Linear(32, 10)
 
+    def forward(self, x):
+        # x of shape [B, 1, 28, 28]
+        x = F.relu(self.conv1(x))  # -> [B, 16, 14, 14]
+        x = F.max_pool2d(x, 2, 1)  # -> [B, 16, 13, 13]
+        x = F.relu(self.conv2(x))  # -> [B, 32, 5, 5]
+        x = F.max_pool2d(x, 2, 1)  # -> [B, 32, 4, 4]
+        x = x.view(-1, 32 * 4 * 4)  # -> [B, 512]
+        x = F.relu(self.fc1(x))  # -> [B, 32]
+        x = self.fc2(x)  # -> [B, 10]
+        return x
+class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 6, 5)  # Change 3 -> 1 for MNIST
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * 4 * 4, 120)  # adjust from 5*5 to 4*4
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))  # [batch, 6, 24, 24]
+        x = self.pool(F.relu(self.conv2(x)))  # [batch, 16, 8, 8] → pool → [batch, 16, 4, 4]
+        x = torch.flatten(x, 1)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+class Net1(nn.Module):
+    def __init__(self):
+        super(Net1, self).__init__()
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1)
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1)
+        self.fc1 = nn.Linear(2048, 128)
+        self.fc2 = nn.Linear(128, 10)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = F.relu(x)
+        x = self.conv2(x)
+        x = F.relu(x)
+        x = self.conv3(x)
+        x = F.relu(x)
+        x = torch.flatten(x, 1)
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.fc2(x)
+        output = F.log_softmax(x, dim=1)
+        return output
 # --- Evaluation ---
 def evaluate(model, dataloader):
     model.eval()
@@ -200,17 +270,17 @@ def evaluate(model, dataloader):
 # These functions now correctly handle the conversion to/from NumPy for DP_Mechanisms
 def apply_laplace_with_budget(grad: torch.Tensor, sensitivity: float, epsilon: float, gamma: float, accountant: BudgetAccountant) -> torch.Tensor:
     grad_np = grad.cpu().numpy() # Convert PyTorch Tensor to NumPy array
-    noisy_np = DP_Mechanisms.applyDPLaplace(grad_np, sensitivity=sensitivity, epsilon=epsilon, gamma=gamma, accountant=accountant)
+    noisy_np = DP_Mechanisms.applyDPLaplace(grad_np, sensitivity=sensitivity, epsilon=epsilon, gamma=gamma)
     return torch.tensor(noisy_np, dtype=torch.float32).to(device) # Convert NumPy array back to PyTorch Tensor
 
 def apply_gaussian_with_budget(grad: torch.Tensor, delta: float, epsilon: float, gamma: float, accountant: BudgetAccountant) -> torch.Tensor:
     grad_np = grad.cpu().numpy() # Convert PyTorch Tensor to NumPy array
-    noisy_np = DP_Mechanisms.applyDPGaussian(grad_np, delta=delta, epsilon=epsilon, gamma=gamma, accountant=accountant)
+    noisy_np = DP_Mechanisms.applyDPGaussian(grad_np, delta=delta, epsilon=epsilon, gamma=gamma)
     return torch.tensor(noisy_np, dtype=torch.float32).to(device) # Convert NumPy array back to PyTorch Tensor
 
 # --- Training with DP and budget accounting + mixed precision ---
 def train_model_with_budget(dp_type, dp_params, total_epsilon, total_delta, rounds=2, epochs_per_round=3, use_count_sketch=False, sketch_params=None):
-    model = SimpleCNN().to(device)
+    model = Net().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
@@ -260,8 +330,8 @@ def train_model_with_budget(dp_type, dp_params, total_epsilon, total_delta, roun
                                 sensitivity=dp_params.get('sensitivity', 1.0),
                                 gamma=dp_params.get('gamma', 0.01),
                                 num_blocks=sketch_params.get('numBlocks', 1),
-                                device=device,
-                                accountant=accountant # Pass the accountant object
+                                device=device
+                                
                             )
                             
                             idx = 0
@@ -296,10 +366,17 @@ def train_model_with_budget(dp_type, dp_params, total_epsilon, total_delta, roun
                     scaler.step(optimizer)
                     scaler.update()
 
-                    eps_rem, _ = accountant.remaining()
-                    progress_bar.set_postfix(loss=loss.item(), eps_rem=f"{eps_rem}")
+                    # eps_rem, _ = accountant.remaining()
+                    progress_bar.set_postfix(loss=loss.item())
 
                 acc = evaluate(model, testloader)
+                if dp_type=='laplace' or use_count_sketch:
+                    epsilon = epsilon=dp_params.get('epsilon', 1.0)
+                    accountant.spend(epsilon=epsilon, delta=0)
+                elif dp_type=='gaussian' or use_count_sketch:
+                    epsilon =dp_params.get('epsilon', 1.0)
+                    delta=dp_params.get('delta', 1e-5)
+                    accountant.spend(epsilon=epsilon, delta=delta)
                 eps_used, delta_used = accountant.total()
                 eps_rem, delta_rem = accountant.remaining()
 
@@ -321,14 +398,14 @@ def train_model_with_budget(dp_type, dp_params, total_epsilon, total_delta, roun
     return model
 
 if __name__ == "__main__":
-    total_epsilon = 3000
+    total_epsilon = 30
     # Avoid using delta=1.0, as it causes remaining().delta to always be 1.0. (IBM Budget Accountant issue)
     total_delta = 1-1e-9 # Set a delta close to 1 but not exactly 1 to avoid issues with remaining budget checks
-    rounds = 50
-    epochs_per_round = 4
+    rounds = 5
+    epochs_per_round = 5
     delta=1e-5
-    epsilon= 0.001
-    gamma=1e-5
+    epsilon= 1
+    gamma=0.01
     sensitivity = 1.0
     print("===========Parameters for DP Training===========")
     print(f"Running experiments with ε={epsilon}, δ={delta}, γ={gamma}, sensitivity={sensitivity}")
@@ -337,41 +414,43 @@ if __name__ == "__main__":
     print(f"Batch size: {batch_size}\n")
 
 
-    # print("\n=== Experiment 1: No DP Noise ===")
-    # start = time.time()
-    # train_model_with_budget(dp_type=None, dp_params={}, total_epsilon=total_epsilon, total_delta=total_delta,
-    #                         rounds=rounds, epochs_per_round=epochs_per_round)
-    # print(f"Time run: {time.time() - start:.2f} seconds\n")
+    print("\n=== Experiment 1: No DP Noise ===")
+    start = time.time()
+    train_model_with_budget(dp_type=None, dp_params={}, total_epsilon=total_epsilon, total_delta=total_delta,
+                            rounds=rounds, epochs_per_round=epochs_per_round)
+    print(f"Time run: {time.time() - start:.2f} seconds\n")
 
-    # print("\n=== Experiment 2: Gaussian DP Noise with Budget Accounting ===")
-    # start = time.time()
-    # train_model_with_budget(dp_type='gaussian',
-    #                         dp_params={'delta': delta, 'epsilon': epsilon, 'gamma': gamma},
-    #                         total_epsilon=total_epsilon, total_delta=total_delta,
-    #                         rounds=rounds, epochs_per_round=epochs_per_round)
-    # print(f"Time run: {time.time() - start:.2f} seconds\n")
+    print("\n=== Experiment 2: Gaussian DP Noise with Budget Accounting ===")
+    start = time.time()
+    train_model_with_budget(dp_type='gaussian',
+                            dp_params={'delta': delta, 'epsilon': epsilon, 'gamma': gamma},
+                            total_epsilon=total_epsilon, total_delta=total_delta,
+                            rounds=rounds, epochs_per_round=epochs_per_round)
+    print(f"Time run: {time.time() - start:.2f} seconds\n")
 
-    # print("\n=== Experiment 3: Laplace DP Noise with Budget Accounting ===")
-    # start = time.time()
-    # train_model_with_budget(dp_type='laplace',
-    #                         dp_params={'sensitivity': sensitivity, 'epsilon': epsilon, 'gamma': gamma},
-    #                         total_epsilon=total_epsilon, total_delta=0.0, # Delta is typically 0 for pure Laplace
-    #                         rounds=rounds, epochs_per_round=epochs_per_round)
-    # print(f"Time run: {time.time() - start:.2f} seconds\n")
-    # Count Sketch parameters
+    print("\n=== Experiment 3: Laplace DP Noise with Budget Accounting ===")
+    start = time.time()
+    train_model_with_budget(dp_type='laplace',
+                            dp_params={'sensitivity': sensitivity, 'epsilon': epsilon, 'gamma': gamma},
+                            total_epsilon=total_epsilon, total_delta=0.0, # Delta is typically 0 for pure Laplace
+                            rounds=rounds, epochs_per_round=epochs_per_round)
+    print(f"Time run: {time.time() - start:.2f} seconds\n")
+    Count Sketch parameters
     sketch_rows = 5
     sketch_cols = 10000
     csvec_blocks = 1
-    
-    # print(f"\n=== Experiment 4: CSVec + Gaussian DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
-    # start = time.time()
-    # train_model_with_budget(dp_type='gaussian',
-    #                         dp_params={'delta': delta, 'epsilon': epsilon, 'gamma': gamma, 'sensitivity': sensitivity}, # Pass sensitivity for CSVec context
-    #                         total_epsilon=total_epsilon, total_delta=total_delta,
-    #                         rounds=rounds, epochs_per_round=epochs_per_round,
-    #                         use_count_sketch=True,
-    #                         sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks})
-    # print(f"Time run: {time.time() - start:.2f} seconds\n")
+    sketch_rows = 3
+    sketch_cols = 2048
+    csvec_blocks = 1
+    print(f"\n=== Experiment 4: CSVec + Gaussian DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
+    start = time.time()
+    train_model_with_budget(dp_type='gaussian',
+                            dp_params={'delta': delta, 'epsilon': epsilon, 'gamma': gamma, 'sensitivity': sensitivity}, # Pass sensitivity for CSVec context
+                            total_epsilon=total_epsilon, total_delta=total_delta,
+                            rounds=rounds, epochs_per_round=epochs_per_round,
+                            use_count_sketch=True,
+                            sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks})
+    print(f"Time run: {time.time() - start:.2f} seconds\n")
     
     print(f"\n=== Experiment 5: CSVec + Laplace DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
     start = time.time()

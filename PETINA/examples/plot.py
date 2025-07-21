@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load the CSV file
-df = pd.read_csv('combined_results.csv')
+df = pd.read_csv('mnist_accuracy_with_dp.csv')
 
 # Define larger font size
 font_size = 16

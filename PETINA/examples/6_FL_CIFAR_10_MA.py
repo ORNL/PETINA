@@ -9,6 +9,7 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 from tqdm import tqdm
+import torch.nn.functional as F
 import warnings
 from numbers import Real, Integral
 import warnings # Required for the IBM BudgetAccountant's internal warnings
@@ -134,17 +135,29 @@ if device.type == 'cuda':
     print(f"Device name: {torch.cuda.get_device_name(0)}")
 
 # --- Load CIFAR-10 dataset ---
-transform = transforms.Compose([
+# transform = transforms.Compose([
+#     transforms.ToTensor(),
+#     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+# ])
+
+# trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+# testset  = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
+
+# batch_size = 1024
+# testloader  = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True)
+# --- Load MNIST dataset ---
+transform_mnist = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    transforms.Normalize((0.1307,), (0.3081,)) # Standard MNIST normalization
 ])
 
-trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-testset  = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
+trainset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform_mnist)
+testset  = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transform_mnist)
 
-batch_size = 1024
-testloader  = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True)
-
+batch_size = 240 # Or whatever you want
+testbatchsize=1024
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True)
+testloader  = torch.utils.data.DataLoader(testset, batch_size=testbatchsize, shuffle=False, num_workers=2, pin_memory=True)
 # --- Simple CNN Model ---
 class SimpleCNN(nn.Module):
     def __init__(self):
@@ -163,7 +176,24 @@ class SimpleCNN(nn.Module):
         x = self.relu(self.fc1(x))
         x = self.fc2(x)
         return x
+class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 6, 5)  # Change 3 -> 1 for MNIST
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * 4 * 4, 120)  # adjust from 5*5 to 4*4
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
 
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))  # [batch, 6, 24, 24]
+        x = self.pool(F.relu(self.conv2(x)))  # [batch, 16, 8, 8] → pool → [batch, 16, 4, 4]
+        x = torch.flatten(x, 1)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
 # --- Evaluation ---
 def evaluate(model, dataloader):
     model.eval()
@@ -205,7 +235,7 @@ class FederatedClient:
         self.sketch_params = sketch_params
         self.accountant = accountant
         self.epochs_per_round = epochs_per_round
-        self.local_model = SimpleCNN().to(self.device)
+        self.local_model = Net().to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.SGD(self.local_model.parameters(), lr=0.01, momentum=0.9)
         self.scaler = torch.amp.GradScaler('cuda' if self.device.type == 'cuda' else 'cpu')
@@ -294,7 +324,7 @@ class FederatedClient:
 
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
-        
+            print("Done")   
         # Return the updated local model parameters
         return self.local_model.state_dict()
 
@@ -304,7 +334,7 @@ class FederatedServer:
                  dp_type: str | None, dp_params: dict, use_count_sketch: bool, sketch_params: dict | None,
                  testloader: torch.utils.data.DataLoader):
         self.num_clients = num_clients
-        self.global_model = SimpleCNN().to(device)
+        self.global_model = Net().to(device)
         self.accountant = BudgetAccountant(epsilon=total_epsilon, delta=total_delta)
         self.device = device
         self.dp_type = dp_type
@@ -426,14 +456,14 @@ class FederatedServer:
 
 
 if __name__ == "__main__":
-    total_epsilon = 11000
+    total_epsilon = 500000000000
     total_delta = 1-1e-9 
-    global_rounds = 4 # Number of communication rounds between server and clients
-    epochs_per_round_client = 10 # Number of local epochs each client runs per global round
+    global_rounds = 5 # Number of communication rounds between server and clients
+    epochs_per_round_client = 5 # Number of local epochs each client runs per global round
     num_federated_clients = 4
     delta = 1e-5
-    epsilon = 0.001
-    gamma = 1e-5
+    epsilon = 1
+    gamma = 0.01
     sensitivity = 1.0
 
     # total_epsilon = 3000
@@ -465,26 +495,26 @@ if __name__ == "__main__":
         sketch_params=None,
         testloader=testloader
     )
-    # server_no_dp.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
-    # trained_global_model_no_dp = server_no_dp.train_federated(global_rounds=global_rounds)
+    server_no_dp.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
+    trained_global_model_no_dp = server_no_dp.train_federated(global_rounds=global_rounds)
 
-    # # --- Experiment 2: Gaussian DP Noise with Budget Accounting ---
-    # print("\n=== Experiment 2: Federated Learning - Gaussian DP Noise with Budget Accounting ===")
-    # server_gaussian_dp = FederatedServer(
-    #     num_clients=num_federated_clients,
-    #     total_epsilon=total_epsilon,
-    #     total_delta=total_delta,
-    #     device=device,
-    #     dp_type='gaussian',
-    #     dp_params={'delta': delta, 'epsilon': epsilon, 'gamma': gamma, 'sensitivity': sensitivity},
-    #     use_count_sketch=False,
-    #     sketch_params=None,
-    #     testloader=testloader
-    # )
-    # server_gaussian_dp.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
-    # trained_global_model_gaussian_dp = server_gaussian_dp.train_federated(global_rounds=global_rounds)
+    # --- Experiment 2: Gaussian DP Noise with Budget Accounting ---
+    print("\n=== Experiment 2: Federated Learning - Gaussian DP Noise with Budget Accounting ===")
+    server_gaussian_dp = FederatedServer(
+        num_clients=num_federated_clients,
+        total_epsilon=total_epsilon,
+        total_delta=total_delta,
+        device=device,
+        dp_type='gaussian',
+        dp_params={'delta': delta, 'epsilon': epsilon, 'gamma': gamma, 'sensitivity': sensitivity},
+        use_count_sketch=False,
+        sketch_params=None,
+        testloader=testloader
+    )
+    server_gaussian_dp.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
+    trained_global_model_gaussian_dp = server_gaussian_dp.train_federated(global_rounds=global_rounds)
 
-    # # --- Experiment 3: Laplace DP Noise with Budget Accounting ---
+    # --- Experiment 3: Laplace DP Noise with Budget Accounting ---
     print("\n=== Experiment 3: Federated Learning - Laplace DP Noise with Budget Accounting ===")
     server_laplace_dp = FederatedServer(
         num_clients=num_federated_clients,
@@ -501,40 +531,41 @@ if __name__ == "__main__":
     trained_global_model_laplace_dp = server_laplace_dp.train_federated(global_rounds=global_rounds)
 
     # --- Experiment 4: CSVec + Gaussian DP with Budget Accounting ---
-    sketch_rows = 5
-    sketch_cols = 10000
+    sketch_rows = 3
+    sketch_cols = 2048
     csvec_blocks = 1
-    # print(f"\n=== Experiment 4: Federated Learning - CSVec + Gaussian DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
-    # server_cs_gaussian = FederatedServer(
-    #     num_clients=num_federated_clients,
-    #     total_epsilon=total_epsilon,
-    #     total_delta=total_delta,
-    #     device=device,
-    #     dp_type='gaussian',
-    #     dp_params={'delta': delta, 'epsilon': epsilon, 'gamma': gamma, 'sensitivity': sensitivity},
-    #     use_count_sketch=True,
-    #     sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks},
-    #     testloader=testloader
-    # )
-    # server_cs_gaussian.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
-    # trained_global_model_cs_gaussian = server_cs_gaussian.train_federated(global_rounds=global_rounds)
+    print(f"\n=== Experiment 4: Federated Learning - CSVec + Gaussian DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
+    server_cs_gaussian = FederatedServer(
+        num_clients=num_federated_clients,
+        total_epsilon=total_epsilon,
+        total_delta=total_delta,
+        device=device,
+        dp_type='gaussian',
+        dp_params={'delta': delta, 'epsilon': epsilon, 'gamma': gamma, 'sensitivity': sensitivity},
+        use_count_sketch=True,
+        sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks},
+        testloader=testloader
+    )
+    server_cs_gaussian.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
+    trained_global_model_cs_gaussian = server_cs_gaussian.train_federated(global_rounds=global_rounds)
 
     # --- Experiment 5: CSVec + Laplace DP with Budget Accounting ---
-    # print(f"\n=== Experiment 5: Federated Learning - CSVec + Laplace DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
-    # server_cs_laplace = FederatedServer(
-    #     num_clients=num_federated_clients,
-    #     total_epsilon=total_epsilon,
-    #     total_delta=0.0, # Delta is typically 0 for pure Laplace
-    #     device=device,
-    #     dp_type='laplace',
-    #     dp_params={'delta': delta,'sensitivity': sensitivity, 'epsilon': epsilon, 'gamma': gamma},
-    #     use_count_sketch=True,
-    #     sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks},
-    #     testloader=testloader
-    # )
-    # server_cs_laplace.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
-    # trained_global_model_cs_laplace = server_cs_laplace.train_federated(global_rounds=global_rounds)
-
+    print(f"\n=== Experiment 5: Federated Learning - CSVec + Laplace DP with Budget Accounting (r={sketch_rows}, c={sketch_cols}, blocks={csvec_blocks}) ===")
+    start = time.time()
+    server_cs_laplace = FederatedServer(
+        num_clients=num_federated_clients,
+        total_epsilon=total_epsilon,
+        total_delta=0.0, # Delta is typically 0 for pure Laplace
+        device=device,
+        dp_type='laplace',
+        dp_params={'delta': delta,'sensitivity': sensitivity, 'epsilon': epsilon, 'gamma': gamma},
+        use_count_sketch=True,
+        sketch_params={'d': sketch_rows, 'w': sketch_cols, 'numBlocks': csvec_blocks},
+        testloader=testloader
+    )
+    server_cs_laplace.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
+    trained_global_model_cs_laplace = server_cs_laplace.train_federated(global_rounds=global_rounds)
+    print(f"Time run: {time.time() - start:.2f} seconds\n")
 # -------------OUTPUT-----------------
 # Using device: cuda
 # Device name: NVIDIA GeForce RTX 3060 Ti
