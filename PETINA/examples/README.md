@@ -9,6 +9,7 @@ To set up the environment, install the required dependencies from [requirements.
 ```bash
 pip install -r requirements.txt
 ```
+
 ## Example List
 ### [Example 1: Basic PETINA Usage](1_basic.py)
 This script demonstrates how to use core features of the PETINA library, including:
