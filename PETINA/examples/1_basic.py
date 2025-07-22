@@ -17,10 +17,6 @@ delta = 1e-5
 gamma = 1e-5
 
 # --- Differential Privacy Mechanisms ---
-print("\n=== Flip Coin Mechanism ===")
-print("FlipCoin (p=0.9) on domain [1-10]:")
-print(DP_Mechanisms.applyFlipCoin(probability=0.9, domain=domain))
-
 print("\n=== Laplace Mechanism ===")
 print("DP =", DP_Mechanisms.applyDPLaplace(domain, sensitivity, epsilon))
 
@@ -78,10 +74,6 @@ print(Encoding_Pertubation.get_gamma_sigma(p=0.5, eps=epsilon))
 
 # === Synthetic Like Numbers ===
 # Domain: [1328, 175, 1040, 304, 6318, 990, 442, 80, 932, 5270]
-
-# === Flip Coin Mechanism ===
-# FlipCoin (p=0.9) on domain [1-10]:
-# [1328, 175, 1040, 304, 6318, 990, 442, 80, 932, 5270]
 
 # === Laplace Mechanism ===
 # DP = [1320.62177961  187.46655673 1033.11533695  275.22139055 6333.68691776

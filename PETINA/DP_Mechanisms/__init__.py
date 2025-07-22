@@ -1,5 +1,4 @@
 from .core import (
-    applyFlipCoin,
     applyDPGaussian,
     applyRDPGaussian,
     applyDPExponential,
@@ -11,7 +10,6 @@ from .core import (
 )
 
 __all__ = [
-    "applyFlipCoin",
     "applyDPGaussian",
     "applyRDPGaussian",
     "applyDPExponential",
