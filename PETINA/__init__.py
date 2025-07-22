@@ -5,7 +5,7 @@ from .Encoding_Pertubation import *
 from .Clipping import *
 from .package.csvec.csvec import CSVec
 from .package.IBM_budget_accountant import *
-
+from .package.Opacus_budget_accountant import *
 # # Optional: expose main algorithms from root if useful
 # from . import algorithms
 
