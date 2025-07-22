@@ -5,43 +5,30 @@ from PETINA.Data_Conversion_Helper import TypeConverter
 # -------------------------------
 # Simple Clipping
 # -------------------------------
-def applyClipping(values, clipping_threshold):
+def applyClipping(values, lower_bound, upper_bound):
     """
-    Clips values at the given clipping threshold.
+    Clips values using fixed lower and upper bounds.
 
     Parameters:
         values (list or np.array): List or array of numerical values.
-        clipping_threshold (float): The max threshold for clipping.
+        lower_bound (float): Minimum value to clip to.
+        upper_bound (float): Maximum value to clip to.
 
     Returns:
-        List of clipped values.
+        List of values clipped to the specified range.
     """
+    # Convert input to NumPy array for vectorized operations
     values = np.array(values)
-    clipped = np.minimum(values, clipping_threshold)
+
+    # Clip values between the specified bounds
+    clipped = np.clip(values, lower_bound, upper_bound)
+
+    # Convert back to list and return
     return clipped.tolist()
-
-
 # -------------------------------
 # Adaptive Clipping based on quantile
 # -------------------------------
-# def applyClippingAdaptive(domain):
-#     """
-#     Applies adaptive clipping using the 5th percentile as lower bound
-#     and the max value as upper bound.
 
-#     Parameters:
-#         domain: Input data (list, numpy array, or tensor).
-
-#     Returns:
-#         Data with adaptive clipping applied in original format.
-#     """
-#     values, shape = type_checking_and_return_lists(domain)
-#     lower_quantile = 0.05
-#     lower_bound = np.quantile(values, lower_quantile)
-#     upper_bound = np.max(values)
-
-#     clipped = np.clip(values, lower_bound, upper_bound)
-#     return type_checking_return_actual_dtype(domain, clipped.tolist(), shape)
 def applyClippingAdaptive(domain):
     """
     Applies adaptive clipping using the 5th percentile as lower bound
@@ -71,34 +58,16 @@ def applyClippingAdaptive(domain):
 # -------------------------------
 # Clipping with Differential Privacy (Laplace noise)
 # -------------------------------
-# def applyClippingDP(domain, clipping_threshold, sensitivity, epsilon):
-#     """
-#     Clips values then adds Laplace noise for differential privacy.
-
-#     Parameters:
-#         domain: Input data (list, numpy array, or tensor).
-#         clipping_threshold (float): Clipping threshold.
-#         sensitivity (float): Sensitivity of the data.
-#         epsilon (float): Privacy budget.
-
-#     Returns:
-#         Differentially private clipped data in original format.
-#     """
-#     values, shape = type_checking_and_return_lists(domain)
-#     clipped_values = applyClipping(values, clipping_threshold)
-#     noise_scale = sensitivity / epsilon
-#     noise = np.random.laplace(loc=0, scale=noise_scale, size=len(clipped_values))
-#     privatized = np.array(clipped_values) + noise
-#     return type_checking_return_actual_dtype(domain, privatized.tolist(), shape)
-def applyClippingDP(domain, clipping_threshold, sensitivity, epsilon):
+def applyClippingDP(domain, sensitivity, epsilon, lower_quantile=0.05, upper_quantile=0.95):
     """
-    Clips values then adds Laplace noise for differential privacy.
+    Clips values between dynamically chosen bounds (percentiles), then adds Laplace noise for DP.
 
     Parameters:
         domain: Input data (list, numpy array, or tensor).
-        clipping_threshold (float): Clipping threshold.
         sensitivity (float): Sensitivity of the data.
         epsilon (float): Privacy budget.
+        lower_quantile (float): Lower quantile for clipping bound (default 5th percentile).
+        upper_quantile (float): Upper quantile for clipping bound (default 95th percentile).
 
     Returns:
         Differentially private clipped data in the original format.
@@ -107,8 +76,12 @@ def applyClippingDP(domain, clipping_threshold, sensitivity, epsilon):
     converter = TypeConverter(domain)
     values, _ = converter.get()
 
-    # Apply clipping
-    clipped_values = applyClipping(values, clipping_threshold)
+    # Compute clipping bounds dynamically
+    lower_bound = np.quantile(values, lower_quantile)
+    upper_bound = np.quantile(values, upper_quantile)
+
+    # Apply clipping with dynamic bounds
+    clipped_values = applyClipping(values, lower_bound, upper_bound)
 
     # Add Laplace noise
     noise_scale = sensitivity / epsilon
