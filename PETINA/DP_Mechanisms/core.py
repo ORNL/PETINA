@@ -6,45 +6,6 @@ from scipy import stats as st
 from PETINA.Data_Conversion_Helper import TypeConverter
 from PETINA.package.csvec.csvec import CSVec
 
-# Depending on your data, parameters for each privacy technique below will need to be changed. The default 
-# parameter might not be the best value and can affect the accuracy of your model
-
-def applyFlipCoin(probability, domain):
-    """
-    Applies a "flip coin" mechanism to each item in the input domain.
-    For each item, with probability 'probability', the original item is kept.
-    Otherwise, it is replaced with a random integer between min and max of the domain.
-
-    Parameters:
-        probability (float): Probability (between 0 and 1) to keep the original item.
-        domain: Input data (list, numpy array, or tensor).
-
-    Returns:
-        Data with each item either preserved or replaced with a random value,
-        in the same format as the input.
-    """
-    if not 0 <= probability <= 1:
-        raise ValueError("Probability must be between 0 and 1.")
-    
-    # Convert input to flat list and track original shape/type
-    converter = TypeConverter(domain)
-    items, _ = converter.get()
-
-    # Precompute min and max for random replacement
-    item_min = min(items)
-    item_max = max(items)
-
-    # Decide which items to keep vs replace
-    keep_mask = [np.random.rand() < probability for _ in items]
-
-    # Build result list by flipping coin
-    result = [
-        n if keep else random.randint(item_min, item_max)
-        for n, keep in zip(items, keep_mask)
-    ]
-
-    # Restore result to original type/shape
-    return converter.restore(result)
 # -------------------------------
 # Source: Differential Privacy by Cynthia Dwork, International Colloquium on Automata, Languages and Programming (ICALP) 2006, p. 1–12. doi:10.1007/11787006_1
 # -------------------------------
@@ -285,71 +246,6 @@ def applyPruningDP(domain, prune_ratio, sensitivity, epsilon):
 # -------------------------------
 # Source: https://github.com/nikitaivkin/csh#
 # -------------------------------
-### Count Sketch for Private Aggregation
-
-# Here is the new function, `applyCountSketch`, which uses the `CSVec` library to sketch and un-sketch your input data. This method is valuable for private aggregation in distributed settings like federated learning because it allows you to represent large, high-dimensional vectors (like model updates) with a much smaller sketch while still maintaining a strong estimate of the original data.
-
-# def applyCountSketch(domain, sketch_rows, sketch_cols, dp_mechanism, dp_params, num_blocks=1, device=None):
-#     """
-#     Applies Count Sketch to the input domain, then adds differential privacy
-#     noise to the sketched representation, and finally reconstructs the data.
-
-#     Parameters:
-#         domain: Input data (list, numpy array, or torch.Tensor).
-#         sketch_rows (int): Number of rows (r) for the Count Sketch.
-#         sketch_cols (int): Number of columns (c) for the Count Sketch.
-#         dp_mechanism (callable): The differential privacy noise function to apply
-#                                  (e.g., DP_Mechanisms.applyDPGaussian,
-#                                  DP_Mechanisms.applyDPLaplace).
-#                                  This function should expect a numpy array and return a numpy array.
-#         dp_params (dict): A dictionary of parameters required by the dp_mechanism.
-#         num_blocks (int, optional): Number of blocks for CSVec's memory optimization. Default is 1.
-#         device (torch.device or str, optional): The device to perform operations on.
-#                                                 Defaults to 'cuda' if available, else 'cpu'.
-
-#     Returns:
-#         The differentially private, sketched, and reconstructed data in the
-#         original format of the input domain.
-#     """
-#     # Use TypeConverter to handle various input types and flatten the domain
-#     converter = TypeConverter(domain)
-#     flattened_data, original_shape = converter.get()
-
-#     # Ensure flattened_data is a PyTorch tensor on the correct device for CSVec
-#     if not isinstance(flattened_data, torch.Tensor):
-#         flattened_data = torch.tensor(flattened_data, dtype=torch.float32)
-    
-#     if device is None:
-#         device = 'cuda' if torch.cuda.is_available() else 'cpu'
-#     flattened_data = flattened_data.to(device)
-
-#     # Initialize CSVec
-#     # d: original_dim, c: columns, r: rows
-#     csvec_instance = CSVec(
-#         d=flattened_data.numel(),
-#         c=sketch_cols,
-#         r=sketch_rows,
-#         numBlocks=num_blocks,
-#         device=device
-#     )
-
-#     # Accumulate the flattened data into the Count Sketch
-#     csvec_instance.accumulateVec(flattened_data)
-
-#     # Apply DP noise to the internal table of the CSVec
-#     # The table is a (r, c) tensor. We need to detach, move to CPU, convert to numpy,
-#     # apply noise, convert back to tensor, and move back to device.
-#     sketched_table_np = csvec_instance.table.detach().cpu().numpy()
-#     noisy_sketched_table_np = dp_mechanism(sketched_table_np, **dp_params)
-#     csvec_instance.table = torch.tensor(noisy_sketched_table_np, dtype=torch.float32).to(device)
-
-#     # Reconstruct the data from the noisy sketch
-#     reconstructed_noisy_data = csvec_instance._findAllValues()
-
-#     # Restore the reconstructed data to the original input type and shape
-#     # _findAllValues returns a 1D tensor, so convert to list for TypeConverter
-#     return converter.restore(reconstructed_noisy_data.tolist())
-
 def applyCountSketch(
     domain: list | np.ndarray | torch.Tensor,
     num_rows: int,
