@@ -206,3 +206,53 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# ===========Parameters for DP Training===========
+# Running experiments with ε=1, δ=1e-05, γ=0.01, sensitivity=1.0
+# Epochs: 5
+# Batch size: 240
+
+
+# === Experiment 1: No DP Noise ===
+# /mnt/c/Users/ducnguyen/Desktop/ORNL/Working_PETINA/PETINA/PETINA/package/Opacus_budget_accountant/accountants/gdp.py:23: UserWarning: GDP accounting is experimental and can underestimate privacy expenditure.Proceed with caution. More details: https://arxiv.org/pdf/2106.02848.pdf      
+#   warnings.warn(
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:06<00:00, 39.19it/s]
+# Train Epoch: 1  Loss: 0.477132 Test Accuracy = 96.73% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:07<00:00, 34.79it/s]
+# Train Epoch: 2  Loss: 0.099253 Test Accuracy = 97.73% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:03<00:00, 69.88it/s]
+# Train Epoch: 3  Loss: 0.061180 Test Accuracy = 98.16% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:03<00:00, 68.68it/s]
+# Train Epoch: 4  Loss: 0.046758 Test Accuracy = 98.19% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:03<00:00, 70.11it/s]
+# Train Epoch: 5  Loss: 0.039491 Test Accuracy = 98.53% )
+# Time run: 27.84 seconds
+
+
+# === Experiment 2: Gaussian DP Noise with Budget Accounting ===
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:11<00:00, 21.53it/s]
+# Train Epoch: 1  Loss: 0.895086 (ε_accountant = 0.41, δ = 1e-05 Test Accuracy = 94.32% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:15<00:00, 16.49it/s]
+# Train Epoch: 2  Loss: 0.169962 (ε_accountant = 0.60, δ = 1e-05 Test Accuracy = 96.39% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:11<00:00, 21.52it/s]
+# Train Epoch: 3  Loss: 0.123647 (ε_accountant = 0.75, δ = 1e-05 Test Accuracy = 96.71% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:12<00:00, 20.43it/s]
+# Train Epoch: 4  Loss: 0.101407 (ε_accountant = 0.88, δ = 1e-05 Test Accuracy = 97.61% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:15<00:00, 15.83it/s]
+# Train Epoch: 5  Loss: 0.091556 (ε_accountant = 1.00, δ = 1e-05 Test Accuracy = 97.32% )
+# Time run: 69.43 seconds
+
+
+# === Experiment 3: CSVec + Gaussian DP with Budget Accounting (r=5, c=260, blocks=1) ===        
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:14<00:00, 17.56it/s]
+# Train Epoch: 1  Loss: 0.926059 (ε_accountant = 0.41, δ = 1e-05 Test Accuracy = 87.22% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:17<00:00, 14.60it/s]
+# Train Epoch: 2  Loss: 0.333673 (ε_accountant = 0.60, δ = 1e-05 Test Accuracy = 92.84% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:13<00:00, 18.40it/s]
+# Train Epoch: 3  Loss: 0.229118 (ε_accountant = 0.75, δ = 1e-05 Test Accuracy = 93.60% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:17<00:00, 14.58it/s]
+# Train Epoch: 4  Loss: 0.189926 (ε_accountant = 0.88, δ = 1e-05 Test Accuracy = 94.81% )
+# 100%|████████████████████████████████████████████████████████| 250/250 [00:13<00:00, 18.26it/s]
+# Train Epoch: 5  Loss: 0.168853 (ε_accountant = 1.00, δ = 1e-05 Test Accuracy = 95.46% )
+# Time run: 78.80 seconds
