@@ -246,6 +246,64 @@ def applyPruningDP(domain, prune_ratio, sensitivity, epsilon):
 # -------------------------------
 # Source: https://github.com/nikitaivkin/csh#
 # -------------------------------
+# def applyCountSketch(
+#     domain: list | np.ndarray | torch.Tensor,
+#     num_rows: int,
+#     num_cols: int,
+#     epsilon: float,
+#     delta: float,
+#     mechanism: str = "gaussian",
+#     sensitivity: float = 1.0,
+#     gamma: float = 0.01,
+#     num_blocks: int = 1,
+#     device: torch.device | str | None = None
+# ) -> list | np.ndarray | torch.Tensor:
+#     """
+#     Applies Count Sketch to the input data, then adds differential privacy
+#     noise to the sketched representation, and finally reconstructs the data.
+#     Consumes budget from the provided BudgetAccountant.
+#     """
+#     converter = TypeConverter(domain)
+#     flattened_data_tensor, original_shape = converter.get()
+
+#     # Ensure tensor
+#     if not isinstance(flattened_data_tensor, torch.Tensor):
+#         flattened_data_tensor = torch.tensor(flattened_data_tensor, dtype=torch.float32)
+
+#     if device is None:
+#         device = 'cuda' if torch.cuda.is_available() else 'cpu'
+#     device = torch.device(device)
+
+#     flattened_data_tensor = flattened_data_tensor.to(device)
+
+#     csvec_instance = CSVec(
+#         d=flattened_data_tensor.numel(),
+#         c=num_cols,
+#         r=num_rows,
+#         numBlocks=num_blocks,
+#         device=device
+#     )
+
+#     csvec_instance.accumulateVec(flattened_data_tensor)
+
+#     sketched_table_np = csvec_instance.table.detach().cpu().numpy()
+
+#     if mechanism == "gaussian":
+#         noisy_sketched_table_np = applyDPGaussian(
+#             sketched_table_np, delta=delta, epsilon=epsilon, gamma=gamma
+#         )
+#     elif mechanism == "laplace":
+#         noisy_sketched_table_np = applyDPLaplace(
+#             sketched_table_np, sensitivity=sensitivity, epsilon=epsilon, gamma=gamma
+#         )
+#     else:
+#         raise ValueError(f"Unsupported DP mechanism for Count Sketch: {mechanism}. Choose 'gaussian' or 'laplace'.")
+
+#     csvec_instance.table = torch.tensor(noisy_sketched_table_np, dtype=torch.float32).to(device)
+#     reconstructed_noisy_data = csvec_instance._findAllValues()
+
+#     return converter.restore(reconstructed_noisy_data.tolist())
+
 def applyCountSketch(
     domain: list | np.ndarray | torch.Tensor,
     num_rows: int,
@@ -256,17 +314,19 @@ def applyCountSketch(
     sensitivity: float = 1.0,
     gamma: float = 0.01,
     num_blocks: int = 1,
-    device: torch.device | str | None = None
-) -> list | np.ndarray | torch.Tensor:
+    device: torch.device | str | None = None,
+    return_sketch_only: bool = False
+    ) -> CSVec | torch.Tensor:
     """
-    Applies Count Sketch to the input data, then adds differential privacy
-    noise to the sketched representation, and finally reconstructs the data.
-    Consumes budget from the provided BudgetAccountant.
+    Applies Count Sketch to the input data and optionally adds differential privacy
+    noise to the sketched representation.
+
+    If return_sketch_only=True: returns the CSVec object with (optionally) DP noise added.
+    If return_sketch_only=False: reconstructs the vector from the noisy sketch (client-side recovery).
     """
     converter = TypeConverter(domain)
     flattened_data_tensor, original_shape = converter.get()
 
-    # Ensure tensor
     if not isinstance(flattened_data_tensor, torch.Tensor):
         flattened_data_tensor = torch.tensor(flattened_data_tensor, dtype=torch.float32)
 
@@ -286,20 +346,23 @@ def applyCountSketch(
 
     csvec_instance.accumulateVec(flattened_data_tensor)
 
-    sketched_table_np = csvec_instance.table.detach().cpu().numpy()
+    # Add DP noise to the sketch
+    if mechanism:
+        sketch_np = csvec_instance.table.detach().cpu().numpy()
 
-    if mechanism == "gaussian":
-        noisy_sketched_table_np = applyDPGaussian(
-            sketched_table_np, delta=delta, epsilon=epsilon, gamma=gamma
-        )
-    elif mechanism == "laplace":
-        noisy_sketched_table_np = applyDPLaplace(
-            sketched_table_np, sensitivity=sensitivity, epsilon=epsilon, gamma=gamma
-        )
-    else:
-        raise ValueError(f"Unsupported DP mechanism for Count Sketch: {mechanism}. Choose 'gaussian' or 'laplace'.")
+        if mechanism == "gaussian":
+            sketch_np = applyDPGaussian(sketch_np, delta=delta, epsilon=epsilon, gamma=gamma)
+        elif mechanism == "laplace":
+            sketch_np = applyDPLaplace(sketch_np, sensitivity=sensitivity, epsilon=epsilon, gamma=gamma)
+        else:
+            raise ValueError(f"Unsupported DP mechanism: {mechanism}. Choose 'gaussian' or 'laplace'.")
 
-    csvec_instance.table = torch.tensor(noisy_sketched_table_np, dtype=torch.float32).to(device)
+        csvec_instance.table = torch.tensor(sketch_np, dtype=torch.float32).to(device)
+
+    # Client sends only the sketch to server
+    if return_sketch_only:
+        return csvec_instance
+
+    # Optional: client reconstructs (only if needed)
     reconstructed_noisy_data = csvec_instance._findAllValues()
-
     return converter.restore(reconstructed_noisy_data.tolist())
