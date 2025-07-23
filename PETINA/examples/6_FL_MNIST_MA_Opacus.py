@@ -109,12 +109,14 @@ class FederatedClient:
         for e in range(self.epochs_per_round):
             self.local_model.train()
             losses = []
+
             for _batch_idx, (data, target)  in enumerate(tqdm(self.trainloader)):
                 data, target = data.to(device), target.to(device)
                 self.optimizer.zero_grad()
                 outputs = self.local_model(data)
                 loss = self.criterion(outputs, target)
                 loss.backward()
+                
                 if self.dp_type is not None:                   
                     if self.use_count_sketch:
                         grad_list = [p.grad.view(-1) for p in self.local_model.parameters() if p.grad is not None]

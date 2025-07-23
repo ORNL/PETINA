@@ -127,40 +127,73 @@ class FederatedClient:
                 self.optimizer.zero_grad()
                 outputs = self.local_model(data)
                 loss = self.criterion(outputs, target)
-                loss.backward()
-
+                loss.backward()                  
+                if self.use_count_sketch is False and self.dp_type=='gaussian':# Direct DP application (without Count Sketch)
+                    for p in self.local_model.parameters():
+                        if p.grad is None: continue
+                        if self.dp_type == 'gaussian':
+                            p.grad = apply_gaussian_with_budget(
+                                p.grad,
+                                delta=self.dp_params.get('delta', 1e-5),
+                                epsilon=self.dp_params.get('epsilon', 1.0),
+                                gamma=self.dp_params.get('gamma', 1.0)
+                                # accountant=self.accountant
+                            )
+                        else:
+                            raise ValueError(f"Unknown dp_type: {self.dp_type}")
+                    sample_rate = self.trainloader.batch_size / self.data_per_client
+                    sigma = get_noise_multiplier(
+                        target_epsilon=self.dp_params['epsilon'],
+                        target_delta=self.dp_params['delta'],
+                        sample_rate=sample_rate,
+                        epochs=self.epochs_per_round,
+                        accountant="gdp",
+                    )
+                    accountantOPC.step(noise_multiplier=sigma, sample_rate=sample_rate)
                 # Clip gradients BEFORE applying optimizer step (standard for DP-SGD)
                 torch.nn.utils.clip_grad_norm_(self.local_model.parameters(), max_norm=1.0)
                 self.optimizer.step()
                 losses.append(loss.item())
-
             loss_str = f"Train Epoch: {e+1} \tLoss: {np.mean(losses):.6f}"
             # Privacy accounting here for the Opacus budget accountant based on per-batch operations
             # This part is tricky. If noise is added AFTER local training, this accounting for per-batch
             # noise application might not be accurate for the total privacy loss.
             # For simplicity, we keep it here but note the potential discrepancy.
-            sample_rate = self.trainloader.batch_size / self.data_per_client
-            sigma = get_noise_multiplier(
-                target_epsilon=self.dp_params['epsilon'],
-                target_delta=self.dp_params['delta'],
-                sample_rate=sample_rate,
-                epochs=self.epochs_per_round,
-                accountant="gdp",
-            )
-            accountantOPC.step(noise_multiplier=sigma, sample_rate=sample_rate)
-
-
-            if self.dp_type is not None:
-                epsilon_accounted = accountantOPC.get_epsilon(delta=self.dp_params.get('delta', 1e-5))
-                print(f"{loss_str} (ε_accountant = {epsilon_accounted:.2f}, δ = {self.dp_params.get('delta', 1e-5)} )")
-
+            # sample_rate = self.trainloader.batch_size / self.data_per_client
+            # sigma = get_noise_multiplier(
+            #     target_epsilon=self.dp_params['epsilon'],
+            #     target_delta=self.dp_params['delta'],
+            #     sample_rate=sample_rate,
+            #     epochs=self.epochs_per_round,
+            #     accountant="gdp",
+            # )
+            # accountantOPC.step(noise_multiplier=sigma, sample_rate=sample_rate)
+            # if self.use_count_sketch is None and self.dp_type=='gaussian':
+            #     epsilon_accounted = accountantOPC.get_epsilon(delta=self.dp_params.get('delta', 1e-5))
+            #     print(f"{loss_str} (ε_accountant = {epsilon_accounted:.2f}, δ = {self.dp_params.get('delta', 1e-5)} )")
+            # if self.use_count_sketch is None:
+            #     self.local_model.state_dict()
+            if self.use_count_sketch is False:
+                if self.dp_type == 'gaussian':
+                    delta = self.dp_params.get('delta', 1e-5)
+                    epsilon_accounted = accountantOPC.get_epsilon(delta=delta)
+                    print(f"{loss_str} (ε_accountant = {epsilon_accounted:.2f}, δ = {delta})")
+        if self.use_count_sketch is False:
+            final_flat_params = torch.cat([p.detach().view(-1) for p in self.local_model.parameters()])
+            model_update_delta = final_flat_params - initial_flat_params
+            return {
+                "raw_delta": model_update_delta,
+                "original_shape": final_flat_params.shape,
+            }
         # --- AFTER LOCAL TRAINING: Calculate model update (delta) and apply DP ---
-        final_flat_params = torch.cat([p.detach().view(-1) for p in self.local_model.parameters()])
-        model_update_delta = final_flat_params - initial_flat_params
+        # final_flat_params = torch.cat([p.detach().view(-1) for p in self.local_model.parameters()])
+        # model_update_delta = final_flat_params - initial_flat_params
 
         # Apply DP noise and/or Count Sketch to the model_update_delta
-        if self.dp_type is not None:
+        elif self.dp_type is not None:
             if self.use_count_sketch:
+                final_flat_params = torch.cat([p.detach().view(-1) for p in self.local_model.parameters()])
+                model_update_delta = final_flat_params - initial_flat_params
                 mechanism_str = self.mechanism_map.get(self.dp_type)
                 if mechanism_str is None:
                     raise ValueError(f"Unsupported DP noise type '{self.dp_type}' for Count Sketch DP.")
@@ -179,26 +212,28 @@ class FederatedClient:
                     device=self.device,
                     return_sketch_only=True
                 )
+                if self.dp_type == 'gaussian':
+                    print(f"{loss_str} (ε_accountant = {self.dp_params['epsilon']:.2f}, δ = {self.dp_params['delta']})")
                 return {
                     "sketch_table": csvec_update.table,
                     "original_shape": model_update_delta.shape,
                 }
-            else: # Direct DP (no Count Sketch) - This path is not selected in main() for experiment 3
-                # If you were to enable this, you'd apply noise to model_update_delta
-                # using apply_gaussian_with_budget here.
-                # For this fix, we are focusing on the count_sketch path.
-                raise NotImplementedError("Direct DP on model updates (without Count Sketch) not fully implemented in this modification.")
-        else: # No DP
-            # If no DP, simply return the model update delta (or the full model for FedAvg)
-            # For consistency with the server's aggregate_models, we return a "mock" sketch format
-            # or you'd change server_aggregate_models to handle raw deltas.
-            # For now, we'll return a mock sketch (without actual sketch noise if use_dp is False)
-            # if self.use_count_sketch is False. This part might need refinement depending on
-            # how the server aggregates non-sketch updates.
-            return {
-                "raw_delta": model_update_delta, # Send the raw delta for non-DP aggregation
-                "original_shape": model_update_delta.shape,
-            }
+            # else: # Direct DP (no Count Sketch) - This path is not selected in main() for experiment 3
+            #     # If you were to enable this, you'd apply noise to model_update_delta
+            #     # using apply_gaussian_with_budget here.
+            #     # For this fix, we are focusing on the count_sketch path.
+            #     raise NotImplementedError("Direct DP on model updates (without Count Sketch) not fully implemented in this modification.")
+        # else: # No DP
+        #     # If no DP, simply return the model update delta (or the full model for FedAvg)
+        #     # For consistency with the server's aggregate_models, we return a "mock" sketch format
+        #     # or you'd change server_aggregate_models to handle raw deltas.
+        #     # For now, we'll return a mock sketch (without actual sketch noise if use_dp is False)
+        #     # if self.use_count_sketch is False. This part might need refinement depending on
+        #     # how the server aggregates non-sketch updates.
+        #     return {
+        #         "raw_delta": model_update_delta, # Send the raw delta for non-DP aggregation
+        #         "original_shape": model_update_delta.shape,
+        #     }
 
 
 class FederatedServer:
@@ -274,9 +309,17 @@ class FederatedServer:
         else: # Handle raw deltas if not using count sketch (e.g., for non-DP baseline or direct DP)
             # This path expects client_updates to contain 'raw_delta' if use_count_sketch is False
             all_deltas = []
-            for client_update in client_updates:
+            # for client_update in client_updates:
+            #     if "raw_delta" in client_update:
+            #         all_deltas.append(client_update["raw_delta"].to(self.device))
+            for i, client_update in enumerate(client_updates):
+                if client_update is None:
+                    print(f"[Warning] Client {i} returned None. Skipping.")
+                    continue
                 if "raw_delta" in client_update:
                     all_deltas.append(client_update["raw_delta"].to(self.device))
+                else:
+                    print(f"[Warning] Client {i} update missing 'raw_delta'.")
                 # Add logic for full model aggregation if that's the non-DP strategy
                 # For this fix, we assume clients send updates (deltas) or sketches of updates.
 
@@ -352,6 +395,39 @@ def main():
     print(f"Total global rounds: {global_rounds}, local epochs per client: {epochs_per_round_client}")
     print(f"Number of federated clients: {num_federated_clients}")
     print(f"Batch size: {batch_size}\n")
+
+    
+    # # --- Experiment 1: No DP Noise ---
+    print("\n=== Experiment 1: Federated Learning - No DP Noise ===")
+    start = time.time()
+    server_no_dp = FederatedServer(
+        num_clients=num_federated_clients,
+        device=device,
+        dp_type=None,
+        dp_params={},
+        use_count_sketch=False,
+        sketch_params=None,
+        testloader=testloader
+    )
+    server_no_dp.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
+    trained_global_model_no_dp = server_no_dp.train_federated(global_rounds=global_rounds)
+    print(f"Time run: {time.time() - start:.2f} seconds\n")
+
+    # --- Experiment 2: Gaussian DP Noise with Budget Accounting ---
+    print("\n=== Experiment 2: Federated Learning - Gaussian DP Noise with Budget Accounting ===")
+    start = time.time()
+    server_gaussian_dp = FederatedServer(
+        num_clients=num_federated_clients,
+        device=device,
+        dp_type='gaussian',
+        dp_params={'delta': delta, 'epsilon': epsilon, 'gamma': gamma, 'sensitivity': sensitivity},
+        use_count_sketch=False,
+        sketch_params=None,
+        testloader=testloader
+    )
+    server_gaussian_dp.distribute_data_to_clients(trainset, batch_size, epochs_per_round_client)
+    trained_global_model_gaussian_dp = server_gaussian_dp.train_federated(global_rounds=global_rounds)
+    print(f"Time run: {time.time() - start:.2f} seconds\n")
 
 
     # --- Experiment 3: CSVec + Gaussian DP with Budget Accounting ---
