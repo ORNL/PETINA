@@ -167,9 +167,9 @@ def main():
     epsilon     = 1.0
     gamma       = 0.01
     sensitivity = 1.0
-    epochs      = 15
-    sketch_rows = 5       
-    sketch_cols = 260   
+    epochs      = 20
+    sketch_rows = 5      
+    sketch_cols = 520 #x10   
     csvec_blocks = 1
 
     print("===== Differential Privacy Parameters =====")
@@ -229,100 +229,125 @@ if __name__ == "__main__":
 # --------------OUTPUT--------------
 # ===== Differential Privacy Parameters =====
 # ε=1.0, δ=1e-05, γ=0.01, sensitivity=1.0
-# Using Count Sketch rows=5, cols=260, blocks=1
+# Using Count Sketch rows=5, cols=520, blocks=1
 # ===========================================
 
 # === No DP Noise ===
-#  Epoch 1 Accuracy: 0.9663                                                                                          
-#  Epoch 2 Accuracy: 0.9853                                                                                          
-#  Epoch 3 Accuracy: 0.9874                                                                                          
-#  Epoch 4 Accuracy: 0.9890                                                                                          
-#  Epoch 5 Accuracy: 0.9861                                                                                          
-#  Epoch 6 Accuracy: 0.9871                                                                                          
-#  Epoch 7 Accuracy: 0.9898                                                                                          
-#  Epoch 8 Accuracy: 0.9865                                                                                          
-#  Epoch 9 Accuracy: 0.9896                                                                                          
-#  Epoch 10 Accuracy: 0.9892                                                                                         
-#  Epoch 11 Accuracy: 0.9885                                                                                         
-#  Epoch 12 Accuracy: 0.9874                                                                                         
-#  Epoch 13 Accuracy: 0.9895                                                                                         
-#  Epoch 14 Accuracy: 0.9899                                                                                         
-#  Epoch 15 Accuracy: 0.9875                                                                                         
+#  Epoch 1 Accuracy: 0.9709                                                                                                                           
+#  Epoch 2 Accuracy: 0.9855                                                                                                                           
+#  Epoch 3 Accuracy: 0.9862                                                                                                                           
+#  Epoch 4 Accuracy: 0.9881                                                                                                                           
+#  Epoch 5 Accuracy: 0.9868                                                                                                                           
+#  Epoch 6 Accuracy: 0.9876                                                                                                                           
+#  Epoch 7 Accuracy: 0.9894                                                                                                                           
+#  Epoch 8 Accuracy: 0.9880                                                                                                                           
+#  Epoch 9 Accuracy: 0.9898                                                                                                                           
+#  Epoch 10 Accuracy: 0.9895                                                                                                                          
+#  Epoch 11 Accuracy: 0.9889                                                                                                                          
+#  Epoch 12 Accuracy: 0.9895                                                                                                                          
+#  Epoch 13 Accuracy: 0.9854                                                                                                                          
+#  Epoch 14 Accuracy: 0.9906                                                                                                                          
+#  Epoch 15 Accuracy: 0.9885                                                                                                                          
+#  Epoch 16 Accuracy: 0.9906                                                                                                                          
+#  Epoch 17 Accuracy: 0.9908                                                                                                                          
+#  Epoch 18 Accuracy: 0.9893                                                                                                                          
+#  Epoch 19 Accuracy: 0.9913                                                                                                                          
+#  Epoch 20 Accuracy: 0.9902                                                                                                                          
 # Training Done.
-# Time run: 82.34 seconds
+# Time run: 68.93 seconds
 
 # === Gaussian DP Noise ===
-#  Epoch 1 Accuracy: 0.9337                                                                                          
-#  Epoch 2 Accuracy: 0.9582                                                                                          
-#  Epoch 3 Accuracy: 0.9675                                                                                          
-#  Epoch 4 Accuracy: 0.9737                                                                                          
-#  Epoch 5 Accuracy: 0.9766                                                                                          
-#  Epoch 6 Accuracy: 0.9769                                                                                          
-#  Epoch 7 Accuracy: 0.9792                                                                                          
-#  Epoch 8 Accuracy: 0.9777                                                                                          
-#  Epoch 9 Accuracy: 0.9798                                                                                          
-#  Epoch 10 Accuracy: 0.9800                                                                                         
-#  Epoch 11 Accuracy: 0.9815                                                                                         
-#  Epoch 12 Accuracy: 0.9747                                                                                         
-#  Epoch 13 Accuracy: 0.9824                                                                                         
-#  Epoch 14 Accuracy: 0.9810                                                                                         
-#  Epoch 15 Accuracy: 0.9827                                                                                         
+#  Epoch 1 Accuracy: 0.9415                                                                                                                           
+#  Epoch 2 Accuracy: 0.9625                                                                                                                           
+#  Epoch 3 Accuracy: 0.9705                                                                                                                           
+#  Epoch 4 Accuracy: 0.9711                                                                                                                           
+#  Epoch 5 Accuracy: 0.9750                                                                                                                           
+#  Epoch 6 Accuracy: 0.9781                                                                                                                           
+#  Epoch 7 Accuracy: 0.9651                                                                                                                           
+#  Epoch 8 Accuracy: 0.9803                                                                                                                           
+#  Epoch 9 Accuracy: 0.9803                                                                                                                           
+#  Epoch 10 Accuracy: 0.9771                                                                                                                          
+#  Epoch 11 Accuracy: 0.9767                                                                                                                          
+#  Epoch 12 Accuracy: 0.9774                                                                                                                          
+#  Epoch 13 Accuracy: 0.9786                                                                                                                          
+#  Epoch 14 Accuracy: 0.9752                                                                                                                          
+#  Epoch 15 Accuracy: 0.9832                                                                                                                          
+#  Epoch 16 Accuracy: 0.9800                                                                                                                          
+#  Epoch 17 Accuracy: 0.9836                                                                                                                          
+#  Epoch 18 Accuracy: 0.9829                                                                                                                          
+#  Epoch 19 Accuracy: 0.9821                                                                                                                          
+#  Epoch 20 Accuracy: 0.9819                                                                                                                          
 # Training Done.
-# Time run: 87.34 seconds
+# Time run: 68.93 seconds
 
 # === Laplace DP Noise ===
-#  Epoch 1 Accuracy: 0.9586                                                                                          
-#  Epoch 2 Accuracy: 0.9766                                                                                          
-#  Epoch 3 Accuracy: 0.9778                                                                                          
-#  Epoch 4 Accuracy: 0.9842                                                                                          
-#  Epoch 5 Accuracy: 0.9822                                                                                          
-#  Epoch 6 Accuracy: 0.9853                                                                                          
-#  Epoch 7 Accuracy: 0.9854                                                                                          
-#  Epoch 8 Accuracy: 0.9857                                                                                          
-#  Epoch 9 Accuracy: 0.9866                                                                                          
-#  Epoch 10 Accuracy: 0.9857                                                                                         
-#  Epoch 11 Accuracy: 0.9868                                                                                         
-#  Epoch 12 Accuracy: 0.9848                                                                                         
-#  Epoch 13 Accuracy: 0.9865                                                                                         
-#  Epoch 14 Accuracy: 0.9838                                                                                         
-#  Epoch 15 Accuracy: 0.9869                                                                                         
+#  Epoch 1 Accuracy: 0.9636                                                                                                                           
+#  Epoch 2 Accuracy: 0.9719                                                                                                                           
+#  Epoch 3 Accuracy: 0.9812                                                                                                                           
+#  Epoch 4 Accuracy: 0.9837                                                                                                                           
+#  Epoch 5 Accuracy: 0.9869                                                                                                                           
+#  Epoch 6 Accuracy: 0.9836                                                                                                                           
+#  Epoch 7 Accuracy: 0.9851                                                                                                                           
+#  Epoch 8 Accuracy: 0.9869                                                                                                                           
+#  Epoch 9 Accuracy: 0.9849                                                                                                                           
+#  Epoch 10 Accuracy: 0.9830                                                                                                                          
+#  Epoch 11 Accuracy: 0.9881                                                                                                                          
+#  Epoch 12 Accuracy: 0.9866                                                                                                                          
+#  Epoch 13 Accuracy: 0.9869                                                                                                                          
+#  Epoch 14 Accuracy: 0.9856                                                                                                                          
+#  Epoch 15 Accuracy: 0.9877                                                                                                                          
+#  Epoch 16 Accuracy: 0.9822                                                                                                                          
+#  Epoch 17 Accuracy: 0.9866                                                                                                                          
+#  Epoch 18 Accuracy: 0.9864                                                                                                                          
+#  Epoch 19 Accuracy: 0.9872                                                                                                                          
+#  Epoch 20 Accuracy: 0.9852                                                                                                                          
 # Training Done.
-# Time run: 84.64 seconds
+# Time run: 68.98 seconds
 
 # === CSVec + Gaussian DP ===
-#  Epoch 1 Accuracy: 0.8686                                                                                          
-#  Epoch 2 Accuracy: 0.9300                                                                                          
-#  Epoch 3 Accuracy: 0.9389                                                                                          
-#  Epoch 4 Accuracy: 0.9536                                                                                          
-#  Epoch 5 Accuracy: 0.9538                                                                                          
-#  Epoch 6 Accuracy: 0.9604                                                                                          
-#  Epoch 7 Accuracy: 0.9619                                                                                          
-#  Epoch 8 Accuracy: 0.9679                                                                                          
-#  Epoch 9 Accuracy: 0.9620                                                                                          
-#  Epoch 10 Accuracy: 0.9642                                                                                         
-#  Epoch 11 Accuracy: 0.9607                                                                                         
-#  Epoch 12 Accuracy: 0.9707                                                                                         
-#  Epoch 13 Accuracy: 0.9665                                                                                         
-#  Epoch 14 Accuracy: 0.9693                                                                                         
-#  Epoch 15 Accuracy: 0.9665                                                                                         
+#  Epoch 1 Accuracy: 0.8857                                                                                                                           
+#  Epoch 2 Accuracy: 0.9328                                                                                                                           
+#  Epoch 3 Accuracy: 0.9556                                                                                                                           
+#  Epoch 4 Accuracy: 0.9596                                                                                                                           
+#  Epoch 5 Accuracy: 0.9684                                                                                                                           
+#  Epoch 6 Accuracy: 0.9716                                                                                                                           
+#  Epoch 7 Accuracy: 0.9686                                                                                                                           
+#  Epoch 8 Accuracy: 0.9709                                                                                                                           
+#  Epoch 9 Accuracy: 0.9741                                                                                                                           
+#  Epoch 10 Accuracy: 0.9749                                                                                                                          
+#  Epoch 11 Accuracy: 0.9754                                                                                                                          
+#  Epoch 12 Accuracy: 0.9776                                                                                                                          
+#  Epoch 13 Accuracy: 0.9756                                                                                                                          
+#  Epoch 14 Accuracy: 0.9743                                                                                                                          
+#  Epoch 15 Accuracy: 0.9754                                                                                                                          
+#  Epoch 16 Accuracy: 0.9763                                                                                                                          
+#  Epoch 17 Accuracy: 0.9776                                                                                                                          
+#  Epoch 18 Accuracy: 0.9748                                                                                                                          
+#  Epoch 19 Accuracy: 0.9757                                                                                                                          
+#  Epoch 20 Accuracy: 0.9748                                                                                                                          
 # Training Done.
-# Time run: 86.91 seconds
+# Time run: 69.19 seconds
 
 # === CSVec + Laplace DP ===
-#  Epoch 1 Accuracy: 0.8829                                                                                          
-#  Epoch 2 Accuracy: 0.9126                                                                                          
-#  Epoch 3 Accuracy: 0.9330                                                                                          
-#  Epoch 4 Accuracy: 0.9508                                                                                          
-#  Epoch 5 Accuracy: 0.9509                                                                                          
-#  Epoch 6 Accuracy: 0.9546                                                                                          
-#  Epoch 7 Accuracy: 0.9538                                                                                          
-#  Epoch 8 Accuracy: 0.9598                                                                                          
-#  Epoch 9 Accuracy: 0.9638                                                                                          
-#  Epoch 10 Accuracy: 0.9585                                                                                         
-#  Epoch 11 Accuracy: 0.9584                                                                                         
-#  Epoch 12 Accuracy: 0.9596                                                                                         
-#  Epoch 13 Accuracy: 0.9591                                                                                         
-#  Epoch 14 Accuracy: 0.9624                                                                                         
-#  Epoch 15 Accuracy: 0.9621                                                                                         
+#  Epoch 1 Accuracy: 0.9139                                                                                                                           
+#  Epoch 2 Accuracy: 0.9504                                                                                                                           
+#  Epoch 3 Accuracy: 0.9634                                                                                                                           
+#  Epoch 4 Accuracy: 0.9690                                                                                                                           
+#  Epoch 5 Accuracy: 0.9685                                                                                                                           
+#  Epoch 6 Accuracy: 0.9711                                                                                                                           
+#  Epoch 7 Accuracy: 0.9745                                                                                                                           
+#  Epoch 8 Accuracy: 0.9731                                                                                                                           
+#  Epoch 9 Accuracy: 0.9736                                                                                                                           
+#  Epoch 10 Accuracy: 0.9759                                                                                                                          
+#  Epoch 11 Accuracy: 0.9750                                                                                                                          
+#  Epoch 12 Accuracy: 0.9753                                                                                                                          
+#  Epoch 13 Accuracy: 0.9709                                                                                                                          
+#  Epoch 14 Accuracy: 0.9784                                                                                                                          
+#  Epoch 15 Accuracy: 0.9699                                                                                                                          
+#  Epoch 16 Accuracy: 0.9767                                                                                                                          
+#  Epoch 17 Accuracy: 0.9799                                                                                                                          
+#  Epoch 18 Accuracy: 0.9785                                                                                                                          
+#  Epoch 19 Accuracy: 0.9787                                                                                                                          
+#  Epoch 20 Accuracy: 0.9772                                                                                                                          
 # Training Done.
-# Time run: 79.04 seconds
+# Time run: 69.58 seconds
