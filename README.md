@@ -8,9 +8,7 @@
 [![Downloads](https://static.pepy.tech/badge/petina)](https://pepy.tech/project/petina)
 
 **PETINA** is a general-purpose Python library for Differential Privacy (DP), designed for flexibility, modularity, and extensibility across a wide range of ML and data processing pipelines. It supports both numerical and categorical data, with tools for supervised and unsupervised tasks.
-## TODO:
-- [ ] Add 3 MA from Opals
-- [ ] Noise multiplier will need to get the epsilon value Opacus
+
 ##  Features
 
 PETINA includes state-of-the-art tools for:
