@@ -18,7 +18,6 @@ PETINA includes state-of-the-art tools for:
 - Gaussian Mechanism
 - Renyi-Gaussian Mechanism
 - Exponential Mechanism
-- Flip Coin Mechanism
 - Pruning
 - Pruning Adaptive
 - Pruning DP
@@ -93,11 +92,12 @@ print(f"Noisy ages: {np.round(noisy_ages, 2)}")
 ```
 We also provide hands-on [examples](./PETINA/examples/) in the examples folder.
 
-- [Example 1](./PETINA/examples/tutorial1_basic.py): Basic PETINA Usage.
-- [Example 2](./PETINA/examples/tutorial2_CountSketch_PureLDP.py): This example demonstrates how to perform frequency estimation on synthetic categorical data using various pure Local Differential Privacy (LDP) algorithms. It also compares PETINA's Count Mean Sketch (CMS) and CSVec-based sketching with baseline LDP methods and a centralized CMS variant.
-- [Example 3](./PETINA/examples/tutorial3_Moment_Accounting.py): This script demonstrates differentially private training in PyTorch using PETINA with budget tracking, clipping, and noise injection.
-- [Example 4](./PETINA/examples/tutorial4_csVec_implementation_PETINA.py): This script demonstrates how to apply PETINA's Count Sketch mechanism to lists, NumPy arrays, and PyTorch tensors for efficient data approximation.
-- [Example 5](./PETINA/examples/tutorial5_PETINA_MA_Implement.py): This script runs a federated learning simulation with optional Laplace, Gaussian, or Count Sketch-based privacy mechanisms, integrated with PETINA's budget accountant to track and gracefully handle differential privacy budget consumption.
+- [Example 1](./PETINA/examples/1_basic.py): Basic PETINA Usage. This example script demonstrates key components of PETINA by generating synthetic data, configuring differential privacy parameters, and applying multiple DP mechanisms (Laplace, Gaussian, Exponential), encoding schemes (Unary, Histogram), clipping techniques (static and adaptive), pruning methods (fixed, adaptive, and DP-aware), and utility functions for calibrating privacy-preserving noise.
+- [Example 2](./PETINA/examples/2_Personal_data.py): This script demonstrates how to apply PETINA’s differential privacy mechanisms—including unary encoding, Laplace noise, clipping, and pruning—to categorical and numerical features from the UCI Adult dataset for privacy-preserving data analysis.
+- [Example 3](./PETINA/examples/3_Iris_data.py): This script applies PETINA's differential privacy techniques—including unary encoding for categorical species data, Laplace noise for numeric features, and adaptive clipping—to the Iris dataset for privacy-preserving data transformation and analysis.
+- [Example 4](./PETINA/examples/4_ML_MNIST_No_MA.py): This script trains a CNN on MNIST with and without differential privacy using PETINA, supporting standard (Laplace, Gaussian) and Count Sketch-based mechanisms for privatizing gradients, and compares their impact on model performance and runtime.
+- [Example 5](./PETINA/examples/5_ML_MNIST_MA_Opacus.py): This script trains a CNN on MNIST using PETINA with Gaussian differential privacy and budget accounting (via Opacus GDP accountant), optionally enhanced with Count Sketch compression (CSVec), and evaluates the privacy-utility tradeoff over multiple training runs.
+- [Example 6](./PETINA/examples/6_FL_MNIST_MA_Opacus.py): This script implements federated training of a CNN on MNIST with optional Gaussian differential privacy and Count Sketch compression (CSVec), managing local client updates, DP noise addition, sketching, and secure aggregation with privacy budget accounting over multiple global rounds.
 ##  Installation
 - Install from PyPI
 ```bash

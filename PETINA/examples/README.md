@@ -36,14 +36,32 @@ This script showcases PETINA’s differential privacy techniques applied to the 
 - Demonstrates adaptive clipping on a numerical feature to limit extreme values while preserving data utility.
 - Great for learning how PETINA handles mixed data types in a classic ML dataset with DP protections.
 
-### [Example 4: Training CNN on CIFAR-10 with PETINA Differential Privacy](4_ML_CIFAR_10_No_MA.py)
-This example demonstrates training a Convolutional Neural Network (CNN) on the CIFAR-10 dataset with differentially private gradient updates using PETINA:
-- Implements DP-SGD style training by adding noise to model gradients each batch.
-- Supports three experiments:
-- No privacy — standard training without noise.
-- Gaussian noise — adds Gaussian noise calibrated to privacy parameters.
-- Laplace noise — adds Laplace noise calibrated to privacy parameters.
-- Allows configurable privacy parameters (epsilon, delta, gamma, sensitivity).
-- Measures and prints training time for each experiment.
-- Evaluates test accuracy after each epoch to observe impact of privacy noise on model performance.
-- Great for understanding the tradeoff between privacy and model accuracy when training deep learning models with PETINA.
+### [Example 4: MNIST Training with Differential Privacy and Count Sketch - No Budget Accounting](4_ML_MNIST_No_MA.py)
+This example demonstrates training a simple CNN on MNIST with PETINA’s differential privacy mechanisms, including:
+* Standard training without DP noise (baseline)
+* Gaussian and Laplace DP noise injection on gradients
+* Count Sketch (CSVec) compression combined with DP noise to reduce gradient size and improve privacy-utility tradeoff
+* Support for both Gaussian and Laplace noise with and without sketching
+* Real-time training progress with tqdm and accuracy evaluation after each epoch
+* Configurable sketch parameters (rows, cols, blocks) and DP parameters (ε, δ, γ, sensitivity)
+* Illustrates practical usage of PETINA’s DP mechanisms and Count Sketch utility in a centralized supervised learning pipeline
+### [Example 5: DP Training with Count Sketch Compression on MNIST - With Budget Accounting](5_ML_MNIST_MA_Opacus.py)
+This example demonstrates training a CNN on MNIST with differential privacy (DP) using PETINA, featuring:
+- Basic CNN architecture implemented in PyTorch
+- Support for DP noise injection using Gaussian mechanism with budget accounting (via Opacus GDP accountant)
+- Integration of Count Sketch (CSVec) compression combined with DP noise to reduce gradient dimensionality and communication cost
+- Three experimental modes:
+    1. Training without DP noise (baseline)
+    2. Training with Gaussian DP noise and privacy budget tracking
+    3. Training with Count Sketch + Gaussian DP noise for compressed privatized gradients
+- Evaluation on MNIST test set after each epoch
+- Illustrates practical usage of PETINA’s DP mechanisms and sketching utilities in centralized training pipelines
+
+### [Example 6: Federated Learning with DP and Count Sketch - With Budget Accounting](6_FL_MNIST_MA_Opacus.py)
+This example showcases a federated learning pipeline on MNIST using PETINA, featuring:
+- Federated client-server architecture with multiple clients
+- Local training of CNN models on client data with optional DP noise (Gaussian)
+- Count Sketch (CSVec) compression of model updates combined with DP for communication efficiency
+- Privacy budget accounting using Opacus’ GDP accountant
+- Aggregation of privatized updates and global model evaluation over multiple rounds
+- Demonstrates practical integration of PETINA’s DP mechanisms in federated settings with advanced sketching
