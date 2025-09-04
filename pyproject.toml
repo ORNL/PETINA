@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "PETINA"
-version = "0.0.17"
+version = "0.0.18"
 description = "This library contains a collection of privacy preservation techniques."
 readme = "README.md"
 requires-python = ">=3.8"
