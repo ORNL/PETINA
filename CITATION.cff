@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use PETINA in your research, please cite it using the metadata below."
+type: software
+title: "PETINA: Privacy prEservaTIoN Algorithms"
+abstract: "A general-purpose Python library for Differential Privacy, with tools for numerical and categorical data in ML and data processing pipelines."
+authors:
+  - family-names: Kotevska
+    given-names: Olivera
+    email: kotevskao@ornl.gov
+    affiliation: Oak Ridge National Laboratory
+  - family-names: Nguyen
+    given-names: Duc
+    affiliation: Oak Ridge National Laboratory
+version: 1.0.0
+date-released: 2026-10-10
+license: MIT
+repository-code: "https://github.com/ORNL/PETINA"
+url: "https://www.osti.gov/doecode/biblio/149859"
+identifiers:
+  - type: url
+    value: "https://www.osti.gov/doecode/biblio/149859"
+    description: "DOE CODE record (OSTI Code ID 149859)"
+keywords:
+  - differential privacy
+  - privacy
+  - machine learning
+  - federated learning

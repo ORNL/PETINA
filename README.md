@@ -6,6 +6,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/petina)](https://pypi.org/project/PETINA/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Downloads](https://static.pepy.tech/badge/petina)](https://pepy.tech/project/petina)
+[![DOE CODE](https://img.shields.io/badge/DOE%20CODE-149859-blue)](https://www.osti.gov/doecode/biblio/149859)
 
 **PETINA** is a general-purpose Python library for Differential Privacy (DP), designed for flexibility, modularity, and extensibility across a wide range of ML and data processing pipelines. It supports both numerical and categorical data, with tools for supervised and unsupervised tasks.
 
@@ -112,11 +113,16 @@ pip install -e .
 ## Citing PETINA
 If you use PETINA in your research, please cite the official DOE OSTI release:  
 > [https://www.osti.gov/doecode/biblio/149859](https://www.osti.gov/doecode/biblio/149859)
-```bash
-@misc{ doecode_149859,
-  title = {ORNL/PETINA},
-  author = {Kotevska, Ole and Nguyen, Duc},
-  abstractNote = {This is a library that has implementation of privacy preservation algorithms.},
+
+Citation metadata is also provided in [CITATION.cff](CITATION.cff) (GitHub's "Cite this repository" button uses it).
+```bibtex
+@misc{doecode_149859,
+  title = {PETINA: Privacy prEservaTIoN Algorithms},
+  author = {Kotevska, Olivera and Nguyen, Duc},
+  version = {1.0.0},
+  year = {2026},
+  howpublished = {DOE CODE, Code ID 149859},
+  url = {https://www.osti.gov/doecode/biblio/149859},
 }
 ```
 ## Contributors
