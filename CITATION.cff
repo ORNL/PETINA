@@ -8,6 +8,7 @@ authors:
     given-names: Olivera
     email: kotevskao@ornl.gov
     affiliation: Oak Ridge National Laboratory
+    orcid: "https://orcid.org/0000-0003-1677-2243"
   - family-names: Nguyen
     given-names: Duc
     affiliation: Oak Ridge National Laboratory
@@ -29,3 +30,5 @@ keywords:
   - privacy
   - machine learning
   - federated learning
+  - privacy-preserving machine learning
+  - Python

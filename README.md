@@ -127,8 +127,8 @@ Citation metadata is also provided in [CITATION.cff](CITATION.cff) (GitHub's "Ci
 }
 ```
 ## Contributors
-- Oliver Kotevska – KOTEVSKAO@ORNL.GOV – Maintainer
-- Trong Nguyen – NT9@ORNL.GOV – Developer
+- Olivera Kotevska ([ORCID 0000-0003-1677-2243](https://orcid.org/0000-0003-1677-2243)) – KOTEVSKAO@ORNL.GOV – Maintainer
+- Duc Nguyen – Developer (former ORNL intern)
 
 
 We welcome community contributions to PETINA.

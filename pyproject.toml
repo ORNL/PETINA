@@ -10,14 +10,14 @@ readme = "README.md"
 requires-python = ">=3.8"
 authors = [
   {name = "Olivera Kotevska", email = "KOTEVSKAO@ORNL.GOV"},
-
+  {name = "Duc Nguyen"},
 ]
 maintainers = [
   {name = "Olivera Kotevska", email = "KOTEVSKAO@ORNL.GOV"}
 ]
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
-keywords = ["privacy", "machine learning", "federated learning"]
+keywords = ["differential privacy", "privacy", "machine learning", "federated learning", "privacy-preserving machine learning"]
 classifiers = [
   "Programming Language :: Python",
   "License :: OSI Approved :: MIT License",
@@ -34,5 +34,6 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/ORNL/PETINA"
 Repository = "https://github.com/ORNL/PETINA.git"
+DOI = "https://doi.org/10.11578/dc.20250116.1"
 
 
