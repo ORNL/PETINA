@@ -32,3 +32,50 @@ keywords:
   - federated learning
   - privacy-preserving machine learning
   - Python
+references:
+  - type: conference-paper
+    title: "Privacy-Preserving Federated Learning for Science: Challenges and Research Directions"
+    authors:
+      - family-names: Kim
+        given-names: Kibaek
+      - family-names: Raghavan
+        given-names: Krishnan
+      - family-names: Kotevska
+        given-names: Olivera
+      - family-names: Dorier
+        given-names: Matthieu
+      - family-names: Madduri
+        given-names: Ravi
+      - family-names: Ryu
+        given-names: Minseok
+      - family-names: Munson
+        given-names: Todd
+      - family-names: Ross
+        given-names: Rob
+      - family-names: Flynn
+        given-names: Thomas
+      - family-names: Kagawa
+        given-names: Ai
+      - family-names: Yoon
+        given-names: Byung-Jun
+      - family-names: Engelmann
+        given-names: Christian
+      - family-names: Yousefian
+        given-names: Farzad
+    collection-title: "2024 IEEE International Conference on Big Data (BigData)"
+    publisher:
+      name: IEEE
+    start: 7849
+    end: 7853
+    year: 2024
+    doi: "10.1109/BIGDATA62323.2024.10825853"
+  - type: generic
+    title: "Project: Privacy-Preserving Federated Learning for Science"
+    authors:
+      - family-names: Kotevska
+        given-names: Olivera
+        orcid: "https://orcid.org/0000-0003-1677-2243"
+    publisher:
+      name: Zenodo
+    year: 2026
+    doi: "10.5281/zenodo.23289296"

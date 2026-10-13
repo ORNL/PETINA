@@ -126,6 +126,10 @@ Citation metadata is also provided in [CITATION.cff](CITATION.cff) (GitHub's "Ci
   url = {https://doi.org/10.11578/dc.20250116.1},
 }
 ```
+### Related publications
+- K. Kim, K. Raghavan, O. Kotevska, et al., "Privacy-Preserving Federated Learning for Science: Challenges and Research Directions," *2024 IEEE International Conference on Big Data (BigData)*, pp. 7849–7853, 2024. [doi:10.1109/BIGDATA62323.2024.10825853](https://doi.org/10.1109/BIGDATA62323.2024.10825853)
+- O. Kotevska, "Project: Privacy-Preserving Federated Learning for Science," Zenodo, 2026. [doi:10.5281/zenodo.23289296](https://doi.org/10.5281/zenodo.23289296)
+
 ## Contributors
 - Olivera Kotevska ([ORCID 0000-0003-1677-2243](https://orcid.org/0000-0003-1677-2243)) – KOTEVSKAO@ORNL.GOV – Maintainer
 - Duc Nguyen – Developer (former ORNL intern)
