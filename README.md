@@ -118,7 +118,7 @@ Citation metadata is also provided in [CITATION.cff](CITATION.cff) (GitHub's "Ci
 ```bibtex
 @misc{doecode_149859,
   title = {PETINA: Privacy prEservaTIoN Algorithms},
-  author = {Kotevska, Olivera and Nguyen, Duc},
+  author = {Kotevska, Olivera and Nguyen, Trong},
   version = {1.0.0},
   year = {2026},
   howpublished = {DOE CODE, Code ID 149859},
@@ -145,7 +145,7 @@ The design of PETINA is described in the following paper; please cite it as well
 
 ## Contributors
 - Olivera Kotevska ([ORCID 0000-0003-1677-2243](https://orcid.org/0000-0003-1677-2243)) – KOTEVSKAO@ORNL.GOV – Maintainer
-- Duc Nguyen – Developer (former ORNL intern)
+- Trong Nguyen – Developer (former ORNL intern)
 
 
 We welcome community contributions to PETINA.

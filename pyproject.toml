@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 authors = [
   {name = "Olivera Kotevska", email = "KOTEVSKAO@ORNL.GOV"},
-  {name = "Duc Nguyen"},
+  {name = "Trong Nguyen"},
 ]
 maintainers = [
   {name = "Olivera Kotevska", email = "KOTEVSKAO@ORNL.GOV"}
