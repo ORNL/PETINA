@@ -34,6 +34,23 @@ keywords:
   - Python
 references:
   - type: conference-paper
+    title: "Engineering Privacy at the Edge: A Practical Guide to Differential Privacy in System Architectures"
+    authors:
+      - family-names: Kotevska
+        given-names: Olivera
+        orcid: "https://orcid.org/0000-0003-1677-2243"
+      - family-names: Yang
+        given-names: Wenjun
+      - family-names: Al-Masri
+        given-names: Eyhab
+    collection-title: "2025 IEEE 43rd International Conference on Computer Design (ICCD)"
+    publisher:
+      name: IEEE
+    start: 872
+    end: 875
+    year: 2025
+    doi: "10.1109/ICCD65941.2025.00128"
+  - type: conference-paper
     title: "Privacy-Preserving Federated Learning for Science: Challenges and Research Directions"
     authors:
       - family-names: Kim

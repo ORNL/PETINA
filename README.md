@@ -126,7 +126,20 @@ Citation metadata is also provided in [CITATION.cff](CITATION.cff) (GitHub's "Ci
   url = {https://doi.org/10.11578/dc.20250116.1},
 }
 ```
+The design of PETINA is described in the following paper; please cite it as well when discussing the library's methods:
+```bibtex
+@inproceedings{kotevska2025engineering,
+  title = {Engineering Privacy at the Edge: A Practical Guide to Differential Privacy in System Architectures},
+  author = {Kotevska, Olivera and Yang, Wenjun and Al-Masri, Eyhab},
+  booktitle = {2025 IEEE 43rd International Conference on Computer Design (ICCD)},
+  pages = {872--875},
+  year = {2025},
+  publisher = {IEEE},
+  doi = {10.1109/ICCD65941.2025.00128},
+}
+```
 ### Related publications
+- O. Kotevska, W. Yang, and E. Al-Masri, "Engineering Privacy at the Edge: A Practical Guide to Differential Privacy in System Architectures," *2025 IEEE 43rd International Conference on Computer Design (ICCD)*, pp. 872–875, 2025. [doi:10.1109/ICCD65941.2025.00128](https://doi.org/10.1109/ICCD65941.2025.00128) — describes PETINA.
 - K. Kim, K. Raghavan, O. Kotevska, et al., "Privacy-Preserving Federated Learning for Science: Challenges and Research Directions," *2024 IEEE International Conference on Big Data (BigData)*, pp. 7849–7853, 2024. [doi:10.1109/BIGDATA62323.2024.10825853](https://doi.org/10.1109/BIGDATA62323.2024.10825853)
 - O. Kotevska, "Project: Privacy-Preserving Federated Learning for Science," Zenodo, 2026. [doi:10.5281/zenodo.23289296](https://doi.org/10.5281/zenodo.23289296)
 
