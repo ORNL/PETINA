@@ -6,7 +6,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/petina)](https://pypi.org/project/PETINA/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Downloads](https://static.pepy.tech/badge/petina)](https://pepy.tech/project/petina)
-[![DOE CODE](https://img.shields.io/badge/DOE%20CODE-149859-blue)](https://www.osti.gov/doecode/biblio/149859)
+[![DOI](https://img.shields.io/badge/DOI-10.11578%2Fdc.20250116.1-blue)](https://doi.org/10.11578/dc.20250116.1)
 
 **PETINA** is a general-purpose Python library for Differential Privacy (DP), designed for flexibility, modularity, and extensibility across a wide range of ML and data processing pipelines. It supports both numerical and categorical data, with tools for supervised and unsupervised tasks.
 
@@ -111,8 +111,8 @@ cd PETINA
 pip install -e .
 ```
 ## Citing PETINA
-If you use PETINA in your research, please cite the official DOE OSTI release:  
-> [https://www.osti.gov/doecode/biblio/149859](https://www.osti.gov/doecode/biblio/149859)
+If you use PETINA in your research, please cite the official DOE CODE release:  
+> DOI: [10.11578/dc.20250116.1](https://doi.org/10.11578/dc.20250116.1) · OSTI record: [https://www.osti.gov/doecode/biblio/149859](https://www.osti.gov/doecode/biblio/149859)
 
 Citation metadata is also provided in [CITATION.cff](CITATION.cff) (GitHub's "Cite this repository" button uses it).
 ```bibtex
@@ -122,7 +122,8 @@ Citation metadata is also provided in [CITATION.cff](CITATION.cff) (GitHub's "Ci
   version = {1.0.0},
   year = {2026},
   howpublished = {DOE CODE, Code ID 149859},
-  url = {https://www.osti.gov/doecode/biblio/149859},
+  doi = {10.11578/dc.20250116.1},
+  url = {https://doi.org/10.11578/dc.20250116.1},
 }
 ```
 ## Contributors

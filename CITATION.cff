@@ -14,9 +14,13 @@ authors:
 version: 1.0.0
 date-released: 2026-10-10
 license: MIT
+doi: "10.11578/dc.20250116.1"
 repository-code: "https://github.com/ORNL/PETINA"
 url: "https://www.osti.gov/doecode/biblio/149859"
 identifiers:
+  - type: doi
+    value: "10.11578/dc.20250116.1"
+    description: "DOE CODE DOI"
   - type: url
     value: "https://www.osti.gov/doecode/biblio/149859"
     description: "DOE CODE record (OSTI Code ID 149859)"
